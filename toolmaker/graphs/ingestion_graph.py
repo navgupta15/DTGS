@@ -24,7 +24,7 @@ from toolmaker.graphs.nodes.ingest_nodes import (
     fan_out_analysis,
     store_registry,
 )
-from toolmaker.graphs.nodes.schema_nodes import embed_tools, generate_schemas
+from toolmaker.graphs.nodes.schema_nodes import embed_tools, enhance_descriptions, generate_schemas
 
 
 # ── Routing helpers ────────────────────────────────────────────────────────
@@ -51,6 +51,7 @@ def build_ingestion_graph() -> StateGraph:
     builder.add_node("discover_files", discover_files)
     builder.add_node("analyze_file", analyze_file)
     builder.add_node("generate_schemas", generate_schemas)
+    builder.add_node("enhance_descriptions", enhance_descriptions)
     builder.add_node("embed_tools", embed_tools)
     builder.add_node("store_registry", store_registry)
 
@@ -70,7 +71,8 @@ def build_ingestion_graph() -> StateGraph:
 
     # Fan-in: all analyze_file results accumulate, then flow to generate_schemas
     builder.add_edge("analyze_file", "generate_schemas")
-    builder.add_edge("generate_schemas", "embed_tools")
+    builder.add_edge("generate_schemas", "enhance_descriptions")
+    builder.add_edge("enhance_descriptions", "embed_tools")
     builder.add_edge("embed_tools", "store_registry")
     builder.add_edge("store_registry", END)
 
@@ -84,6 +86,7 @@ def run_ingestion(
     registry_path: str = "dtgs.db",
     namespace: str = "default",
     base_url: str = "",
+    enhance_descriptions: bool = True,
 ) -> dict:
     """
     Convenience wrapper: clone, analyze, and store tools from a GitHub repo.
@@ -103,6 +106,7 @@ def run_ingestion(
         "registry_path": registry_path,
         "namespace": namespace,
         "base_url": base_url,
+        "enhance_descriptions": enhance_descriptions,
         "repo_path": "",
 
         "error": None,

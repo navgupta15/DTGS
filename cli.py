@@ -131,6 +131,7 @@ def ingest(
     registry: Path = typer.Option(Path("dtgs.db"), "--registry", "-r", help="SQLite registry path"),
     namespace: str = typer.Option("default", "--namespace", help="Multi-tenant namespace for these tools"),
     base_url: str = typer.Option("", "--base-url", help="Base URL where this API runs (e.g. https://api.myapp.com)"),
+    enhance: bool = typer.Option(True, "--enhance/--no-enhance", help="Use LLM to rewrite and enhance tool descriptions"),
 ) -> None:
     """
     Clone, analyze, and store tools into the SQLite registry (Graph 1).
@@ -142,6 +143,7 @@ def ingest(
     console.print(f"[bold]Running DTGS Ingestion Graph[/] for {github_url}")
     console.print(f"[dim]Namespace:[/] {namespace}")
     console.print(f"[dim]Base URL:[/]  {base_url or '(none)'}")
+    console.print(f"[dim]Enhance:[/]   {'Yes (LLM)' if enhance else 'No'}")
     console.print(f"[dim]Registry:[/]  {registry}")
 
     result = run_ingestion(
@@ -149,6 +151,7 @@ def ingest(
         registry_path=str(registry),
         namespace=namespace,
         base_url=base_url,
+        enhance_descriptions=enhance,
     )
 
     if result.get("error"):
@@ -221,6 +224,48 @@ def serve(
     uvicorn.run(catalog_app, host=host, port=port)
 
 
+@app.command()
+def export(
+    namespace: str = typer.Option("default", "--namespace", help="Namespace to export"),
+    output: Path = typer.Option(Path("openapi.json"), "--output", "-o", help="Output JSON file path"),
+    registry: Path = typer.Option(Path("dtgs.db"), "--registry", "-r", help="SQLite registry path"),
+) -> None:
+    """
+    Offline Generator: Extracts OpenAPI JSON specifications from the SQLite DB.
+    
+    Creates a strict openapi.json file for the given namespace. Helpful to bypass
+    FastAPI browser truncations or statically host the Swagger payload.
+    """
+    from toolmaker.registry.sqlite_registry import ToolRegistry
+    from toolmaker.registry.openapi_generator import generate_openapi_spec
+    
+    if not registry.exists():
+        console.print(f"[bold red]Error:[/] Registry {registry} not found.")
+        raise typer.Exit(code=1)
+        
+    db = ToolRegistry(str(registry))
+    schemas = db.get_all(namespace=namespace, limit=10000)
+    
+    if not schemas:
+        console.print(f"[bold yellow]Warning:[/] No tools found for '{namespace}' in {registry}")
+        raise typer.Exit(code=1)
+        
+    # Get base_url from first matching record
+    base_url = ""
+    with db._connect() as conn:
+        row = conn.execute("SELECT base_url FROM tools WHERE namespace = ? LIMIT 1", (namespace,)).fetchone()
+        if row and row["base_url"]:
+            base_url = row["base_url"]
+            
+    spec = generate_openapi_spec(namespace, schemas, base_url)
+    
+    output.write_text(json.dumps(spec, indent=2), encoding="utf-8")
+    
+    console.print(f"[bold green]Success![/] Extracted [cyan]{len(spec['paths'])}[/] REST endpoints.")
+    console.print(f"[dim]Saved OpenAPI 3.1.0 spec to:[/] {output.absolute()}")
+
+
 if __name__ == "__main__":
     app()
+
 

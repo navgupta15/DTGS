@@ -1,0 +1,68 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "DTGS Generated API: petclinic",
+    "version": "1.0.0",
+    "description": "Auto-generated OpenAPI specification from DTGS AST Analysis."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080"
+    }
+  ],
+  "paths": {
+    "/rpc/unknown": {
+      "post": {
+        "operationId": "VetTests_serialization",
+        "summary": "VetTests_serialization",
+        "description": "Java method: VetTests.serialization",
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          }
+        }
+      }
+    },
+    "/": {
+      "post": {
+        "operationId": "VisitController_loadPetWithVisit",
+        "summary": "VisitController_loadPetWithVisit",
+        "description": "Called before each and every @RequestMapping annotated method. 2 goals: - Make sure we always have fresh data - Since we do not use the session scope, make sure that Pet object always has an id (Even though id is not part of the form fields) @param petId @return Pet",
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ownerId": {
+                    "type": "integer",
+                    "description": "int ownerId"
+                  },
+                  "petId": {
+                    "type": "integer",
+                    "description": "int petId"
+                  },
+                  "model": {
+                    "type": "object",
+                    "description": "Map<String, Object> model"
+                  }
+                },
+                "required": [
+                  "ownerId",
+                  "petId",
+                  "model"
+                ]
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    }
+  }
+}

@@ -127,7 +127,12 @@ uv run python cli.py run-agent "find all pets by owner ID" --registry petclinic.
 uv run python cli.py serve --port 8000
 
 # [Ingestion] Populate a namespace in the SQLite registry
+# NOTE: Uses the LLM to write fantastic descriptions for the tools by default!
 uv run python cli.py ingest https://github.com/owner/repo --namespace service_a --base-url "https://api.a.com"
+
+# [Offline Export] Save the exact openapi.json file for a namespace locally
+uv run python cli.py export --namespace service_a --output my_api_spec.json
+
 
 # [Debug] Analyze a GitHub repo and print schemas only (no registry)
 uv run python cli.py analyze https://github.com/owner/repo --output schemas.json

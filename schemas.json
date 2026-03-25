@@ -1,0 +1,2462 @@
+[
+  {
+    "type": "function",
+    "function": {
+      "name": "BaseEntity_getId",
+      "description": "Java method: BaseEntity.getId",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "BaseEntity_setId",
+      "description": "Java method: BaseEntity.setId",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Integer id"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "BaseEntity_isNew",
+      "description": "Java method: BaseEntity.isNew",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "NamedEntity_getName",
+      "description": "Java method: NamedEntity.getName",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "NamedEntity_setName",
+      "description": "Java method: NamedEntity.setName",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "String name"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "NamedEntity_toString",
+      "description": "Java method: NamedEntity.toString",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "Person_getFirstName",
+      "description": "Java method: Person.getFirstName",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "Person_setFirstName",
+      "description": "Java method: Person.setFirstName",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "description": "String firstName"
+          }
+        },
+        "required": [
+          "firstName"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "Person_getLastName",
+      "description": "Java method: Person.getLastName",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "Person_setLastName",
+      "description": "Java method: Person.setLastName",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "lastName": {
+            "type": "string",
+            "description": "String lastName"
+          }
+        },
+        "required": [
+          "lastName"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "Owner_getAddress",
+      "description": "Java method: Owner.getAddress",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "Owner_setAddress",
+      "description": "Java method: Owner.setAddress",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "String address"
+          }
+        },
+        "required": [
+          "address"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "Owner_getCity",
+      "description": "Java method: Owner.getCity",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "Owner_setCity",
+      "description": "Java method: Owner.setCity",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "city": {
+            "type": "string",
+            "description": "String city"
+          }
+        },
+        "required": [
+          "city"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "Owner_getTelephone",
+      "description": "Java method: Owner.getTelephone",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "Owner_setTelephone",
+      "description": "Java method: Owner.setTelephone",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "telephone": {
+            "type": "string",
+            "description": "String telephone"
+          }
+        },
+        "required": [
+          "telephone"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "Owner_getPets",
+      "description": "Java method: Owner.getPets",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "Owner_addPet",
+      "description": "Java method: Owner.addPet",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "pet": {
+            "type": "string",
+            "description": "Pet pet"
+          }
+        },
+        "required": [
+          "pet"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "Owner_getPet",
+      "description": "Return the Pet with the given name, or null if none found for this Owner. @param name to test @return the Pet with the given name, or null if no such Pet exists for this Owner",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "String name"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "Owner_getPet",
+      "description": "Return the Pet with the given id, or null if none found for this Owner. @param id to test @return the Pet with the given id, or null if no such Pet exists for this Owner",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Integer id"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "Owner_getPet",
+      "description": "Return the Pet with the given name, or null if none found for this Owner. @param name to test @param ignoreNew whether to ignore new pets (pets that are not saved yet) @return the Pet with the given name, or null if no such Pet exists for this Owner",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "String name"
+          },
+          "ignoreNew": {
+            "type": "boolean",
+            "description": "boolean ignoreNew"
+          }
+        },
+        "required": [
+          "name",
+          "ignoreNew"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "Owner_toString",
+      "description": "Return the Pet with the given name, or null if none found for this Owner. @param name to test @param ignoreNew whether to ignore new pets (pets that are not saved yet) @return the Pet with the given name, or null if no such Pet exists for this Owner",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "Owner_addVisit",
+      "description": "Adds the given {@link Visit} to the {@link Pet} with the given identifier. @param petId the identifier of the {@link Pet}, must not be {@literal null}. @param visit the visit to add, must not be {@literal null}.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "petId": {
+            "type": "integer",
+            "description": "Integer petId"
+          },
+          "visit": {
+            "type": "string",
+            "description": "Visit visit"
+          }
+        },
+        "required": [
+          "petId",
+          "visit"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "OwnerController_setAllowedFields",
+      "description": "Java method: OwnerController.setAllowedFields",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "dataBinder": {
+            "type": "string",
+            "description": "WebDataBinder dataBinder"
+          }
+        },
+        "required": [
+          "dataBinder"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "OwnerController_findOwner",
+      "description": "Java method: OwnerController.findOwner",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "ownerId": {
+            "type": "integer",
+            "description": "Integer ownerId"
+          }
+        },
+        "required": [
+          "ownerId"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "OwnerController_initCreationForm",
+      "description": "REST endpoint (GetMapping): OwnerController.initCreationForm",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "OwnerController_processCreationForm",
+      "description": "REST endpoint (PostMapping): OwnerController.processCreationForm",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "owner": {
+            "type": "string",
+            "description": "Owner owner"
+          },
+          "result": {
+            "type": "string",
+            "description": "BindingResult result"
+          },
+          "redirectAttributes": {
+            "type": "string",
+            "description": "RedirectAttributes redirectAttributes"
+          }
+        },
+        "required": [
+          "owner",
+          "result",
+          "redirectAttributes"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "OwnerController_initFindForm",
+      "description": "REST endpoint (GetMapping): OwnerController.initFindForm",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "OwnerController_processFindForm",
+      "description": "REST endpoint (GetMapping): OwnerController.processFindForm",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "description": "int page"
+          },
+          "owner": {
+            "type": "string",
+            "description": "Owner owner"
+          },
+          "result": {
+            "type": "string",
+            "description": "BindingResult result"
+          },
+          "model": {
+            "type": "string",
+            "description": "Model model"
+          }
+        },
+        "required": [
+          "page",
+          "owner",
+          "result",
+          "model"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "OwnerController_addPaginationModel",
+      "description": "Java method: OwnerController.addPaginationModel",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "description": "int page"
+          },
+          "model": {
+            "type": "string",
+            "description": "Model model"
+          },
+          "paginated": {
+            "type": "string",
+            "description": "Page<Owner> paginated"
+          }
+        },
+        "required": [
+          "page",
+          "model",
+          "paginated"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "OwnerController_findPaginatedForOwnersLastName",
+      "description": "Java method: OwnerController.findPaginatedForOwnersLastName",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "description": "int page"
+          },
+          "lastname": {
+            "type": "string",
+            "description": "String lastname"
+          }
+        },
+        "required": [
+          "page",
+          "lastname"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "OwnerController_initUpdateOwnerForm",
+      "description": "REST endpoint (GetMapping): OwnerController.initUpdateOwnerForm",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "OwnerController_processUpdateOwnerForm",
+      "description": "REST endpoint (PostMapping): OwnerController.processUpdateOwnerForm",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "owner": {
+            "type": "string",
+            "description": "Owner owner"
+          },
+          "result": {
+            "type": "string",
+            "description": "BindingResult result"
+          },
+          "ownerId": {
+            "type": "integer",
+            "description": "int ownerId"
+          },
+          "redirectAttributes": {
+            "type": "string",
+            "description": "RedirectAttributes redirectAttributes"
+          }
+        },
+        "required": [
+          "owner",
+          "result",
+          "ownerId",
+          "redirectAttributes"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "OwnerController_showOwner",
+      "description": "Custom handler for displaying an owner. @param ownerId the ID of the owner to display @return a ModelMap with the model attributes for the view",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "ownerId": {
+            "type": "integer",
+            "description": "int ownerId"
+          }
+        },
+        "required": [
+          "ownerId"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "Pet_setBirthDate",
+      "description": "Java method: Pet.setBirthDate",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "birthDate": {
+            "type": "string",
+            "description": "LocalDate birthDate"
+          }
+        },
+        "required": [
+          "birthDate"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "Pet_getBirthDate",
+      "description": "Java method: Pet.getBirthDate",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "Pet_getType",
+      "description": "Java method: Pet.getType",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "Pet_setType",
+      "description": "Java method: Pet.setType",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "PetType type"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "Pet_getVisits",
+      "description": "Java method: Pet.getVisits",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "Pet_addVisit",
+      "description": "Java method: Pet.addVisit",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "visit": {
+            "type": "string",
+            "description": "Visit visit"
+          }
+        },
+        "required": [
+          "visit"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "PetController_populatePetTypes",
+      "description": "Java method: PetController.populatePetTypes",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "PetController_findOwner",
+      "description": "Java method: PetController.findOwner",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "ownerId": {
+            "type": "integer",
+            "description": "int ownerId"
+          }
+        },
+        "required": [
+          "ownerId"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "PetController_findPet",
+      "description": "Java method: PetController.findPet",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "ownerId": {
+            "type": "integer",
+            "description": "int ownerId"
+          },
+          "petId": {
+            "type": "integer",
+            "description": "Integer petId"
+          }
+        },
+        "required": [
+          "ownerId",
+          "petId"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "PetController_initOwnerBinder",
+      "description": "Java method: PetController.initOwnerBinder",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "dataBinder": {
+            "type": "string",
+            "description": "WebDataBinder dataBinder"
+          }
+        },
+        "required": [
+          "dataBinder"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "PetController_initPetBinder",
+      "description": "Java method: PetController.initPetBinder",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "dataBinder": {
+            "type": "string",
+            "description": "WebDataBinder dataBinder"
+          }
+        },
+        "required": [
+          "dataBinder"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "PetController_initCreationForm",
+      "description": "REST endpoint (GetMapping): PetController.initCreationForm",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "owner": {
+            "type": "string",
+            "description": "Owner owner"
+          },
+          "model": {
+            "type": "string",
+            "description": "ModelMap model"
+          }
+        },
+        "required": [
+          "owner",
+          "model"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "PetController_processCreationForm",
+      "description": "REST endpoint (PostMapping): PetController.processCreationForm",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "owner": {
+            "type": "string",
+            "description": "Owner owner"
+          },
+          "pet": {
+            "type": "string",
+            "description": "Pet pet"
+          },
+          "result": {
+            "type": "string",
+            "description": "BindingResult result"
+          },
+          "redirectAttributes": {
+            "type": "string",
+            "description": "RedirectAttributes redirectAttributes"
+          }
+        },
+        "required": [
+          "owner",
+          "pet",
+          "result",
+          "redirectAttributes"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "PetController_initUpdateForm",
+      "description": "REST endpoint (GetMapping): PetController.initUpdateForm",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "PetController_processUpdateForm",
+      "description": "REST endpoint (PostMapping): PetController.processUpdateForm",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "owner": {
+            "type": "string",
+            "description": "Owner owner"
+          },
+          "pet": {
+            "type": "string",
+            "description": "Pet pet"
+          },
+          "result": {
+            "type": "string",
+            "description": "BindingResult result"
+          },
+          "redirectAttributes": {
+            "type": "string",
+            "description": "RedirectAttributes redirectAttributes"
+          }
+        },
+        "required": [
+          "owner",
+          "pet",
+          "result",
+          "redirectAttributes"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "PetController_updatePetDetails",
+      "description": "Updates the pet details if it exists or adds a new pet to the owner. @param owner The owner of the pet @param pet The pet with updated details",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "owner": {
+            "type": "string",
+            "description": "Owner owner"
+          },
+          "pet": {
+            "type": "string",
+            "description": "Pet pet"
+          }
+        },
+        "required": [
+          "owner",
+          "pet"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "PetTypeFormatter_print",
+      "description": "Java method: PetTypeFormatter.print",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "petType": {
+            "type": "string",
+            "description": "PetType petType"
+          },
+          "locale": {
+            "type": "string",
+            "description": "Locale locale"
+          }
+        },
+        "required": [
+          "petType",
+          "locale"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "PetTypeFormatter_parse",
+      "description": "Java method: PetTypeFormatter.parse",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "String text"
+          },
+          "locale": {
+            "type": "string",
+            "description": "Locale locale"
+          }
+        },
+        "required": [
+          "text",
+          "locale"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "PetValidator_validate",
+      "description": "Java method: PetValidator.validate",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "obj": {
+            "type": "object",
+            "description": "Object obj"
+          },
+          "errors": {
+            "type": "string",
+            "description": "Errors errors"
+          }
+        },
+        "required": [
+          "obj",
+          "errors"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "PetValidator_supports",
+      "description": "This Validator validates *just* Pet instances",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "clazz": {
+            "type": "string",
+            "description": "Class<?> clazz"
+          }
+        },
+        "required": [
+          "clazz"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "Visit_getDate",
+      "description": "Creates a new instance of Visit for the current date",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "Visit_setDate",
+      "description": "Creates a new instance of Visit for the current date",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "description": "LocalDate date"
+          }
+        },
+        "required": [
+          "date"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "Visit_getDescription",
+      "description": "Creates a new instance of Visit for the current date",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "Visit_setDescription",
+      "description": "Creates a new instance of Visit for the current date",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "String description"
+          }
+        },
+        "required": [
+          "description"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "VisitController_setAllowedFields",
+      "description": "Java method: VisitController.setAllowedFields",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "dataBinder": {
+            "type": "string",
+            "description": "WebDataBinder dataBinder"
+          }
+        },
+        "required": [
+          "dataBinder"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "VisitController_loadPetWithVisit",
+      "description": "Called before each and every @RequestMapping annotated method. 2 goals: - Make sure we always have fresh data - Since we do not use the session scope, make sure that Pet object always has an id (Even though id is not part of the form fields) @param petId @return Pet",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "ownerId": {
+            "type": "integer",
+            "description": "int ownerId"
+          },
+          "petId": {
+            "type": "integer",
+            "description": "int petId"
+          },
+          "model": {
+            "type": "object",
+            "description": "Map<String, Object> model"
+          }
+        },
+        "required": [
+          "ownerId",
+          "petId",
+          "model"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "VisitController_initNewVisitForm",
+      "description": "REST endpoint (GetMapping): VisitController.initNewVisitForm",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "VisitController_processNewVisitForm",
+      "description": "REST endpoint (PostMapping): VisitController.processNewVisitForm",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "owner": {
+            "type": "string",
+            "description": "Owner owner"
+          },
+          "petId": {
+            "type": "integer",
+            "description": "int petId"
+          },
+          "visit": {
+            "type": "string",
+            "description": "Visit visit"
+          },
+          "result": {
+            "type": "string",
+            "description": "BindingResult result"
+          },
+          "redirectAttributes": {
+            "type": "string",
+            "description": "RedirectAttributes redirectAttributes"
+          }
+        },
+        "required": [
+          "owner",
+          "petId",
+          "visit",
+          "result",
+          "redirectAttributes"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "PetClinicApplication_main",
+      "description": "Java method: PetClinicApplication.main",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "args": {
+            "type": "string",
+            "description": "String[] args"
+          }
+        },
+        "required": [
+          "args"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "PetClinicRuntimeHints_registerHints",
+      "description": "Java method: PetClinicRuntimeHints.registerHints",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "hints": {
+            "type": "string",
+            "description": "RuntimeHints hints"
+          },
+          "classLoader": {
+            "type": "string",
+            "description": "ClassLoader classLoader"
+          }
+        },
+        "required": [
+          "hints",
+          "classLoader"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "CacheConfiguration_petclinicCacheConfigurationCustomizer",
+      "description": "Java method: CacheConfiguration.petclinicCacheConfigurationCustomizer",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "CacheConfiguration_cacheConfiguration",
+      "description": "Create a simple configuration that enable statistics via the JCache programmatic configuration API. <p> Within the configuration object that is provided by the JCache API standard, there is only a very limited set of configuration options. The really relevant configuration options (like the size limit) must be set via a configuration mechanism that is provided by the selected JCache implementation.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "CrashController_triggerException",
+      "description": "REST endpoint (GetMapping): CrashController.triggerException",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "WebConfiguration_localeResolver",
+      "description": "Uses session storage to remember the user\u2019s language setting across requests. Defaults to English if nothing is specified. @return session-based {@link LocaleResolver}",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "WebConfiguration_localeChangeInterceptor",
+      "description": "Allows the app to switch languages using a URL parameter like <code>?lang=es</code>. @return a {@link LocaleChangeInterceptor} that handles the change",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "WebConfiguration_addInterceptors",
+      "description": "Registers the locale change interceptor so it can run on each request. @param registry where interceptors are added",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "registry": {
+            "type": "string",
+            "description": "InterceptorRegistry registry"
+          }
+        },
+        "required": [
+          "registry"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "WelcomeController_welcome",
+      "description": "REST endpoint (GetMapping): WelcomeController.welcome",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "Vet_getSpecialtiesInternal",
+      "description": "Java method: Vet.getSpecialtiesInternal",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "Vet_getSpecialties",
+      "description": "Java method: Vet.getSpecialties",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "Vet_getNrOfSpecialties",
+      "description": "Java method: Vet.getNrOfSpecialties",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "Vet_addSpecialty",
+      "description": "Java method: Vet.addSpecialty",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "specialty": {
+            "type": "string",
+            "description": "Specialty specialty"
+          }
+        },
+        "required": [
+          "specialty"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "VetController_showVetList",
+      "description": "REST endpoint (GetMapping): VetController.showVetList",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "description": "int page"
+          },
+          "model": {
+            "type": "string",
+            "description": "Model model"
+          }
+        },
+        "required": [
+          "page",
+          "model"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "VetController_addPaginationModel",
+      "description": "Java method: VetController.addPaginationModel",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "description": "int page"
+          },
+          "paginated": {
+            "type": "string",
+            "description": "Page<Vet> paginated"
+          },
+          "model": {
+            "type": "string",
+            "description": "Model model"
+          }
+        },
+        "required": [
+          "page",
+          "paginated",
+          "model"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "VetController_findPaginated",
+      "description": "Java method: VetController.findPaginated",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "description": "int page"
+          }
+        },
+        "required": [
+          "page"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "VetController_showResourcesVetList",
+      "description": "REST endpoint (GetMapping): VetController.showResourcesVetList",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "Vets_getVetList",
+      "description": "Java method: Vets.getVetList",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "ValidatorTests_createValidator",
+      "description": "Java method: ValidatorTests.createValidator",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "ValidatorTests_shouldNotValidateWhenFirstNameEmpty",
+      "description": "Java method: ValidatorTests.shouldNotValidateWhenFirstNameEmpty",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "MySqlIntegrationTests_findAll",
+      "description": "Java method: MySqlIntegrationTests.findAll",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "MySqlIntegrationTests_ownerDetails",
+      "description": "Java method: MySqlIntegrationTests.ownerDetails",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "MysqlTestApplication_container",
+      "description": "Java method: MysqlTestApplication.container",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "MysqlTestApplication_main",
+      "description": "Java method: MysqlTestApplication.main",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "args": {
+            "type": "string",
+            "description": "String[] args"
+          }
+        },
+        "required": [
+          "args"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "OwnerControllerTests_george",
+      "description": "Java method: OwnerControllerTests.george",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "OwnerControllerTests_setup",
+      "description": "Java method: OwnerControllerTests.setup",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "OwnerControllerTests_initCreationForm",
+      "description": "Java method: OwnerControllerTests.initCreationForm",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "OwnerControllerTests_processCreationFormSuccess",
+      "description": "Java method: OwnerControllerTests.processCreationFormSuccess",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "OwnerControllerTests_processCreationFormHasErrors",
+      "description": "Java method: OwnerControllerTests.processCreationFormHasErrors",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "OwnerControllerTests_initFindForm",
+      "description": "Java method: OwnerControllerTests.initFindForm",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "OwnerControllerTests_processFindFormSuccess",
+      "description": "Java method: OwnerControllerTests.processFindFormSuccess",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "OwnerControllerTests_processFindFormByLastName",
+      "description": "Java method: OwnerControllerTests.processFindFormByLastName",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "OwnerControllerTests_processFindFormNoOwnersFound",
+      "description": "Java method: OwnerControllerTests.processFindFormNoOwnersFound",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "OwnerControllerTests_initUpdateOwnerForm",
+      "description": "Java method: OwnerControllerTests.initUpdateOwnerForm",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "OwnerControllerTests_processUpdateOwnerFormSuccess",
+      "description": "Java method: OwnerControllerTests.processUpdateOwnerFormSuccess",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "OwnerControllerTests_processUpdateOwnerFormUnchangedSuccess",
+      "description": "Java method: OwnerControllerTests.processUpdateOwnerFormUnchangedSuccess",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "OwnerControllerTests_processUpdateOwnerFormHasErrors",
+      "description": "Java method: OwnerControllerTests.processUpdateOwnerFormHasErrors",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "OwnerControllerTests_showOwner",
+      "description": "Java method: OwnerControllerTests.showOwner",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "OwnerControllerTests_processUpdateOwnerFormWithIdMismatch",
+      "description": "Java method: OwnerControllerTests.processUpdateOwnerFormWithIdMismatch",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "PetControllerTests_setup",
+      "description": "Java method: PetControllerTests.setup",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "PetControllerTests_initCreationForm",
+      "description": "Java method: PetControllerTests.initCreationForm",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "PetControllerTests_processCreationFormSuccess",
+      "description": "Java method: PetControllerTests.processCreationFormSuccess",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "PetControllerTests_processUpdateFormSuccess",
+      "description": "Java method: PetControllerTests.processUpdateFormSuccess",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "ProcessCreationFormHasErrors_processCreationFormWithBlankName",
+      "description": "Java method: ProcessCreationFormHasErrors.processCreationFormWithBlankName",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "ProcessCreationFormHasErrors_processCreationFormWithDuplicateNam",
+      "description": "Java method: ProcessCreationFormHasErrors.processCreationFormWithDuplicateName",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "ProcessCreationFormHasErrors_processCreationFormWithMissingPetTy",
+      "description": "Java method: ProcessCreationFormHasErrors.processCreationFormWithMissingPetType",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "ProcessCreationFormHasErrors_processCreationFormWithInvalidBirth",
+      "description": "Java method: ProcessCreationFormHasErrors.processCreationFormWithInvalidBirthDate",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "ProcessCreationFormHasErrors_initUpdateForm",
+      "description": "Java method: ProcessCreationFormHasErrors.initUpdateForm",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "ProcessUpdateFormHasErrors_processUpdateFormWithInvalidBirthDate",
+      "description": "Java method: ProcessUpdateFormHasErrors.processUpdateFormWithInvalidBirthDate",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "ProcessUpdateFormHasErrors_processUpdateFormWithBlankName",
+      "description": "Java method: ProcessUpdateFormHasErrors.processUpdateFormWithBlankName",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "PetTypeFormatterTests_setup",
+      "description": "Java method: PetTypeFormatterTests.setup",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "PetTypeFormatterTests_testPrint",
+      "description": "Java method: PetTypeFormatterTests.testPrint",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "PetTypeFormatterTests_shouldParse",
+      "description": "Java method: PetTypeFormatterTests.shouldParse",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "PetTypeFormatterTests_shouldThrowParseException",
+      "description": "Java method: PetTypeFormatterTests.shouldThrowParseException",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "PetTypeFormatterTests_makePetTypes",
+      "description": "Helper method to produce some sample pet types just for test purpose @return {@link Collection} of {@link PetType}",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "PetValidatorTests_setUp",
+      "description": "Java method: PetValidatorTests.setUp",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "PetValidatorTests_validate",
+      "description": "Java method: PetValidatorTests.validate",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "ValidateHasErrors_validateWithInvalidPetName",
+      "description": "Java method: ValidateHasErrors.validateWithInvalidPetName",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "ValidateHasErrors_validateWithInvalidPetType",
+      "description": "Java method: ValidateHasErrors.validateWithInvalidPetType",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "ValidateHasErrors_validateWithInvalidBirthDate",
+      "description": "Java method: ValidateHasErrors.validateWithInvalidBirthDate",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "VisitControllerTests_init",
+      "description": "Java method: VisitControllerTests.init",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "VisitControllerTests_initNewVisitForm",
+      "description": "Java method: VisitControllerTests.initNewVisitForm",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "VisitControllerTests_processNewVisitFormSuccess",
+      "description": "Java method: VisitControllerTests.processNewVisitFormSuccess",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "VisitControllerTests_processNewVisitFormHasErrors",
+      "description": "Java method: VisitControllerTests.processNewVisitFormHasErrors",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "PetClinicIntegrationTests_findAll",
+      "description": "Java method: PetClinicIntegrationTests.findAll",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "PetClinicIntegrationTests_ownerDetails",
+      "description": "Java method: PetClinicIntegrationTests.ownerDetails",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "PetClinicIntegrationTests_ownerList",
+      "description": "Java method: PetClinicIntegrationTests.ownerList",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "PetClinicIntegrationTests_main",
+      "description": "Java method: PetClinicIntegrationTests.main",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "args": {
+            "type": "string",
+            "description": "String[] args"
+          }
+        },
+        "required": [
+          "args"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "PostgresIntegrationTests_available",
+      "description": "Java method: PostgresIntegrationTests.available",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "PostgresIntegrationTests_main",
+      "description": "Java method: PostgresIntegrationTests.main",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "args": {
+            "type": "string",
+            "description": "String[] args"
+          }
+        },
+        "required": [
+          "args"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "PostgresIntegrationTests_findAll",
+      "description": "Java method: PostgresIntegrationTests.findAll",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "PostgresIntegrationTests_ownerDetails",
+      "description": "Java method: PostgresIntegrationTests.ownerDetails",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "PropertiesLogger_onApplicationEvent",
+      "description": "Java method: PropertiesLogger.onApplicationEvent",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "event": {
+            "type": "string",
+            "description": "ApplicationPreparedEvent event"
+          }
+        },
+        "required": [
+          "event"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "PropertiesLogger_printProperties",
+      "description": "Java method: PropertiesLogger.printProperties",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "PropertiesLogger_findPropertiesPropertySources",
+      "description": "Java method: PropertiesLogger.findPropertiesPropertySources",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "ClinicServiceTests_shouldFindOwnersByLastName",
+      "description": "Java method: ClinicServiceTests.shouldFindOwnersByLastName",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "ClinicServiceTests_shouldFindSingleOwnerWithPet",
+      "description": "Java method: ClinicServiceTests.shouldFindSingleOwnerWithPet",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "ClinicServiceTests_shouldInsertOwner",
+      "description": "Java method: ClinicServiceTests.shouldInsertOwner",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "ClinicServiceTests_shouldUpdateOwner",
+      "description": "Java method: ClinicServiceTests.shouldUpdateOwner",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "ClinicServiceTests_shouldFindAllPetTypes",
+      "description": "Java method: ClinicServiceTests.shouldFindAllPetTypes",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "ClinicServiceTests_shouldInsertPetIntoDatabaseAndGenerateId",
+      "description": "Java method: ClinicServiceTests.shouldInsertPetIntoDatabaseAndGenerateId",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "ClinicServiceTests_shouldUpdatePetName",
+      "description": "Java method: ClinicServiceTests.shouldUpdatePetName",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "ClinicServiceTests_shouldFindVets",
+      "description": "Java method: ClinicServiceTests.shouldFindVets",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "ClinicServiceTests_shouldAddNewVisitForPet",
+      "description": "Java method: ClinicServiceTests.shouldAddNewVisitForPet",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "ClinicServiceTests_shouldFindVisitsByPetId",
+      "description": "Java method: ClinicServiceTests.shouldFindVisitsByPetId",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "EntityUtils_getById",
+      "description": "Look up the entity of the given class with the given id in the given collection. @param entities the collection to search @param entityClass the entity class to look up @param entityId the entity id to look up @return the found entity @throws ObjectRetrievalFailureException if the entity was not found",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "entities": {
+            "type": "array",
+            "description": "Collection<T> entities",
+            "items": {
+              "type": "string"
+            }
+          },
+          "entityClass": {
+            "type": "string",
+            "description": "Class<T> entityClass"
+          },
+          "entityId": {
+            "type": "integer",
+            "description": "int entityId"
+          }
+        },
+        "required": [
+          "entities",
+          "entityClass",
+          "entityId"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "CrashControllerIntegrationTests_triggerExceptionJson",
+      "description": "Java method: CrashControllerIntegrationTests.triggerExceptionJson",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "CrashControllerIntegrationTests_triggerExceptionHtml",
+      "description": "Java method: CrashControllerIntegrationTests.triggerExceptionHtml",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "CrashControllerTests_triggerException",
+      "description": "Java method: CrashControllerTests.triggerException",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "I18nPropertiesSyncTest_checkNonInternationalizedStrings",
+      "description": "Java method: I18nPropertiesSyncTest.checkNonInternationalizedStrings",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "I18nPropertiesSyncTest_checkI18nPropertyFilesAreInSync",
+      "description": "Java method: I18nPropertiesSyncTest.checkI18nPropertyFilesAreInSync",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "VetControllerTests_james",
+      "description": "Java method: VetControllerTests.james",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "VetControllerTests_helen",
+      "description": "Java method: VetControllerTests.helen",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "VetControllerTests_setup",
+      "description": "Java method: VetControllerTests.setup",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "VetControllerTests_showVetListHtml",
+      "description": "Java method: VetControllerTests.showVetListHtml",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "VetControllerTests_showResourcesVetList",
+      "description": "Java method: VetControllerTests.showResourcesVetList",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "VetTests_serialization",
+      "description": "Java method: VetTests.serialization",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  }
+]

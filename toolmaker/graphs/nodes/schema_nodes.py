@@ -31,6 +31,68 @@ def generate_schemas(state: IngestionState) -> dict:
     return {"tool_schemas": schemas}
 
 
+# ── Node: enhance_descriptions ────────────────────────────────────────────
+
+def enhance_descriptions(state: IngestionState) -> dict:
+    """
+    Given a list of tool schemas, use the configured LLM to rewrite and
+    expand their descriptions for better AI use.
+    Skipped if state["enhance_descriptions"] is False.
+    """
+    schemas = state.get("tool_schemas", [])
+    if not schemas or not state.get("enhance_descriptions", True):
+        return {"tool_schemas": schemas}
+
+    from toolmaker.graphs.nodes.agent_nodes import _get_chat_model
+    import warnings
+    
+    try:
+        model = _get_chat_model()
+    except Exception as e:
+        warnings.warn(f"[DTGS] Failed to load LLM for enhancement: {e}", stacklevel=2)
+        return {"tool_schemas": schemas}
+
+    enhanced_schemas = []
+    
+    from langchain_core.messages import HumanMessage, SystemMessage
+    
+    sys_prompt = SystemMessage(
+        content="You are an expert API documentation writer for AI agents. "
+                "Given a raw tool function, rewrite its description in 1-2 clear, "
+                "comprehensive sentences. Explain what the tool does, what parameters it takes, "
+                "and when an AI should use it. Only output the new description, nothing else."
+    )
+
+    for schema in schemas:
+        func = schema.get("function", {})
+        if not func:
+            enhanced_schemas.append(schema)
+            continue
+            
+        params = func.get("parameters", {})
+        prompt = (
+            f"Tool Name: {func.get('name')}\n"
+            f"Current Description: {func.get('description')}\n"
+            f"Parameters: {params}\n\n"
+            "Write the new description strictly."
+        )
+        
+        try:
+            # invoke the LLM
+            response = model.invoke([sys_prompt, HumanMessage(content=prompt)])
+            new_desc = response.content.strip()
+            
+            # Update the schema inline
+            func["description"] = new_desc
+            enhanced_schemas.append(schema)
+        except Exception as e:
+            warnings.warn(f"[DTGS] LLM enhancement failed for {func.get('name')}: {e}", stacklevel=2)
+            enhanced_schemas.append(schema)
+
+    return {"tool_schemas": enhanced_schemas}
+
+
+
 # ── Node: embed_tools ─────────────────────────────────────────────────────
 
 def embed_tools(state: IngestionState) -> dict:
