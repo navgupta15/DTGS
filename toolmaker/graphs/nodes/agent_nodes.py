@@ -7,7 +7,8 @@ Implements 5 nodes for Graph 2:
 Model backends (controlled via environment variables):
   DTGS_PROVIDER=openai   (default) -- uses ChatOpenAI, requires OPENAI_API_KEY
   DTGS_PROVIDER=ollama             -- uses ChatOllama, requires Ollama running locally
-  DTGS_MODEL=<model>              -- model name (default: gpt-4o-mini / llama3.2)
+  DTGS_PROVIDER=gemini             -- uses ChatGoogleGenerativeAI, requires GOOGLE_API_KEY
+  DTGS_MODEL=<model>              -- model name (default: gpt-4o-mini / llama3.2 / gemini-2.5-flash)
   DTGS_BASE_URL=<url>             -- Ollama server URL (default: http://localhost:11434)
 """
 from __future__ import annotations
@@ -29,10 +30,11 @@ def _get_chat_model() -> BaseChatModel:
     Return a chat model based on environment configuration.
 
     Environment variables:
-      DTGS_PROVIDER  'openai' (default) or 'ollama'
-      DTGS_MODEL     model name -- default 'gpt-4o-mini' (openai) / 'llama3.2' (ollama)
-      DTGS_BASE_URL  Ollama server URL -- default 'http://localhost:11434'
+      DTGS_PROVIDER  'openai' (default), 'ollama', or 'gemini'
+      DTGS_MODEL     model name (default 'gpt-4o-mini' / 'llama3.2' / 'gemini-2.5-flash')
+      DTGS_BASE_URL  Ollama server URL (default 'http://localhost:11434')
       OPENAI_API_KEY required when DTGS_PROVIDER=openai
+      GOOGLE_API_KEY required when DTGS_PROVIDER=gemini
     """
     provider = os.environ.get("DTGS_PROVIDER", "openai").lower()
 
@@ -41,6 +43,14 @@ def _get_chat_model() -> BaseChatModel:
         model = os.environ.get("DTGS_MODEL", "llama3.2")
         base_url = os.environ.get("DTGS_BASE_URL", "http://localhost:11434")
         return ChatOllama(model=model, base_url=base_url, temperature=0)
+
+    if provider == "gemini":
+        from langchain_google_genai import ChatGoogleGenerativeAI
+        model = os.environ.get("DTGS_MODEL", "gemini-2.5-flash")
+        api_key = os.environ.get("GOOGLE_API_KEY", "")
+        if not api_key:
+            raise ValueError("GOOGLE_API_KEY must be set when DTGS_PROVIDER=gemini")
+        return ChatGoogleGenerativeAI(model=model, api_key=api_key, temperature=0)
 
     # Default: OpenAI
     from langchain_openai import ChatOpenAI

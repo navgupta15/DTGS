@@ -111,14 +111,22 @@ uv run python cli.py run-agent "find all pets by owner ID" --registry petclinic.
 
 ### Environment Variable Reference
 
-| Variable | Default | Description |
-|---|---|---|
-| `DTGS_PROVIDER` | `openai` | `openai` or `ollama` |
-| `DTGS_MODEL` | `gpt-4o-mini` / `llama3.2` | Model name |
-| `DTGS_BASE_URL` | `http://localhost:11434` | Ollama server URL |
-| `OPENAI_API_KEY` | — | Required when `DTGS_PROVIDER=openai` |
+DTGS needs to know where to send its LLM reasoning tasks.
 
----
+| Variable             | Description                                          | Default                 |
+|----------------------|------------------------------------------------------|-------------------------|
+| `DTGS_PROVIDER`      | `openai`, `ollama`, or `gemini`                      | `openai`                |
+| `DTGS_MODEL`         | Model name (`gpt-4o-mini`, `gemini-2.5-flash`, etc.) | varies by provider      |
+| `DTGS_BASE_URL`      | Target URL if running `ollama`                       | `http://localhost:11434`|
+| `OPENAI_API_KEY`     | Your OpenAI API key (if using `openai`)              | -                       |
+| `GOOGLE_API_KEY`     | Your Google API key (if using `gemini`)              | -                       |
+
+Example using Gemini locally:
+```bash
+export DTGS_PROVIDER=gemini
+export DTGS_MODEL=gemini-2.5-flash
+export GOOGLE_API_KEY="AIzaSy..."
+```
 
 ## All CLI Commands
 
