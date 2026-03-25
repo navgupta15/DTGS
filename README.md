@@ -6,20 +6,21 @@
 
 ## How It Works
 
-DTGS runs two LangGraph StateGraphs:
+DTGS operates strictly as a **Multi-Tenant Tool Catalog**. It completely avoids taking on execution bottlenecks.
+Instead, it provides the phonebook (OpenAPI specification) so that external LLM chatbots can make API calls directly.
 
 ```
 Graph 1 — Ingestion Pipeline:
   GitHub URL → clone → discover .java files
-             → [parallel AST parse per file]  ← Send API fan-out
-             → generate OpenAI schemas
-             → embed (optional)
-             → store in SQLite registry
+             → [parallel AST parse per file]
+             → extract REST paths, HTTP methods, and parameters
+             → store in SQLite registry under a specific `namespace`
 
-Graph 2 — Agent Query Pipeline:
-  User query → search registry → LLM selects tool
-             → execute tool → synthesize answer
-             → [loop until done or max iterations]
+FastAPI Server — OpenAPI Catalog:
+  GET /api/v1/{namespace}/openapi.json
+             → Dynamically builds strict OpenAPI 3.1.0 specifications
+             → ANY chatbot (ChatGPT, Claude, LangChain) reads this URL
+             → Chatbot makes direct HTTP execution calls to your Java backend
 ```
 
 ---
@@ -41,19 +42,37 @@ uv sync
 
 ## Quick Start
 
-### Step 1 — Ingest a Java repo
+### Step 1 — Ingest a generic repository into a namespace
 
 ```bash
-# From GitHub
-uv run python cli.py ingest https://github.com/spring-projects/spring-petclinic --registry petclinic.db
-
-# From a local Java project
-uv run python cli.py analyze-local ./my-java-project --output tools.json
+uv run python cli.py ingest https://github.com/spring-projects/spring-petclinic \
+   --namespace petclinic \
+   --base-url "http://localhost:8080"
 ```
 
-### Step 2 — Query with the Agent
+### Step 2 — Start the OpenAPI Catalog Server
 
-Choose a model backend — **no OpenAI key required if you use Ollama**.
+```bash
+uv run python cli.py serve --port 8000
+```
+
+### Step 3 — Hook up your Chatbot
+
+Point ChatGPT Custom Actions, LangChain, or Claude to:
+**`http://localhost:8000/api/v1/petclinic/openapi.json`**
+
+The chatbot will instantly learn your Java backend and can make direct HTTP calls to it.
+
+---
+
+## 🛠️ Dynamic Triggers (On-The-Fly Ingestion)
+
+You can command DTGS to ingest new repositories dynamically via HTTP (useful for CI/CD or other orchestrating agents):
+```bash
+curl -X POST http://localhost:8000/api/v1/ingest \
+  -H "Content-Type: application/json" \
+  -d '{"github_url": "https://github.com/org/new-service", "namespace": "new_service", "base_url": "https://api.new.com"}'
+```
 
 ---
 
@@ -104,17 +123,20 @@ uv run python cli.py run-agent "find all pets by owner ID" --registry petclinic.
 ## All CLI Commands
 
 ```bash
-# Analyze a GitHub repo — prints schemas only, no registry
+# [Catalog Server] Start the FastAPI OpenAPI server
+uv run python cli.py serve --port 8000
+
+# [Ingestion] Populate a namespace in the SQLite registry
+uv run python cli.py ingest https://github.com/owner/repo --namespace service_a --base-url "https://api.a.com"
+
+# [Debug] Analyze a GitHub repo and print schemas only (no registry)
 uv run python cli.py analyze https://github.com/owner/repo --output schemas.json
 
-# Analyze a local Java directory — prints schemas only
-uv run python cli.py analyze-local ./my-project --output schemas.json --public-only
+# [Debug] Analyze a local directory and print schemas only
+uv run python cli.py analyze-local ./my-project --output schemas.json
 
-# Ingest GitHub repo into SQLite registry (Graph 1)
-uv run python cli.py ingest https://github.com/owner/repo --registry dtgs.db
-
-# Ask the LLM agent a question (Graph 2)
-uv run python cli.py run-agent "list all REST endpoints" --registry dtgs.db --max-iter 3
+# [Debug] Ask the local terminal LangGraph agent a question
+uv run python cli.py run-agent "list all REST endpoints" --registry dtgs.db
 ```
 
 ---
@@ -169,20 +191,22 @@ public String greet(@RequestParam String name) {
 ```
 toolmaker/
 ├── models.py                    # Pydantic models (AnalyzedMethod, ToolSchema)
-├── ingestion/github.py          # Git clone + .java file discovery
+├── cli.py                       # CLI entrypoints (ingest, serve, analyze)
+├── server/
+│   └── catalog.py               # FastAPI server (GET openapi.json, POST ingest)
+├── ingestion/
+│   └── github.py                # Git clone + .java file discovery
 ├── analyzer/
 │   ├── java_analyzer.py         # tree-sitter-java AST parser
 │   └── schema_generator.py      # Method → OpenAI schema
 ├── registry/
-│   └── sqlite_registry.py       # SQLite store + cosine similarity search
+│   ├── sqlite_registry.py       # Multi-tenant SQLite store
+│   └── openapi_generator.py     # OpenAI schemas → OpenAPI 3.1.0 generator
 └── graphs/
-    ├── state.py                 # IngestionState, AgentState TypedDicts
     ├── ingestion_graph.py       # Graph 1 wiring (Send API, conditional edges)
-    ├── agent_graph.py           # Graph 2 wiring (loop + iteration guard)
+    ├── agent_graph.py           # Graph 2 simulated execution pipeline
     └── nodes/
-        ├── ingest_nodes.py      # clone, discover, fan_out, analyze, store
-        ├── schema_nodes.py      # generate_schemas, embed_tools
-        └── agent_nodes.py       # receive_query, search_tools, llm_select_tool …
+        └── ...
 ```
 
 ---
@@ -212,8 +236,8 @@ uv run pytest tests/ -v
 
 ## Roadmap
 
-- [ ] Sandboxed tool execution (subprocess / Docker)
-- [ ] FastAPI server with MCP protocol endpoint
+- [x] Sandboxed tool execution (Substituted via OpenAPI Decoupled Chatbots)
+- [x] FastAPI Server with OpenAPI/MCP compatible schemas (Multi-tenant)
 - [ ] LangGraph Studio integration
 - [ ] Multi-language support (TypeScript, Python)
 - [ ] Vector store upgrade (ChromaDB / pgvector)

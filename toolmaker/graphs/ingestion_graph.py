@@ -79,13 +79,20 @@ def build_ingestion_graph() -> StateGraph:
 
 # ── Convenience runner ─────────────────────────────────────────────────────
 
-def run_ingestion(github_url: str, registry_path: str = "dtgs.db") -> dict:
+def run_ingestion(
+    github_url: str,
+    registry_path: str = "dtgs.db",
+    namespace: str = "default",
+    base_url: str = "",
+) -> dict:
     """
     Convenience wrapper: clone, analyze, and store tools from a GitHub repo.
 
     Args:
         github_url:    Public GitHub repo URL.
         registry_path: Path to the SQLite DB file (created if not exists).
+        namespace:     Multi-tenant namespace (e.g. "service_a")
+        base_url:      Target API base URL.
 
     Returns:
         Final IngestionState dict.
@@ -94,7 +101,10 @@ def run_ingestion(github_url: str, registry_path: str = "dtgs.db") -> dict:
     initial: IngestionState = {
         "github_url": github_url,
         "registry_path": registry_path,
+        "namespace": namespace,
+        "base_url": base_url,
         "repo_path": "",
+
         "error": None,
         "java_files": [],
         "analyzed_methods": [],

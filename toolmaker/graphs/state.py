@@ -22,6 +22,8 @@ class IngestionState(TypedDict):
     # ── Input ─────────────────────────────────────────────────────────────
     github_url: str                  # e.g. "https://github.com/owner/repo"
     registry_path: str               # path to the SQLite DB file
+    namespace: str                   # multi-tenant namespace (e.g. "service_a")
+    base_url: str                    # target API base URL (e.g. "https://api.myapp.com")
 
     # ── After clone_repo ──────────────────────────────────────────────────
     repo_path: str                   # temp directory with cloned repo
@@ -51,6 +53,8 @@ class FileAnalysisState(TypedDict):
     """Minimal state dispatched to each analyze_file node via Send."""
     file_path: str
     registry_path: str               # forwarded through so store_registry can use it
+    namespace: str                   # forwarded to store_registry
+    base_url: str                    # forwarded to store_registry
 
 
 # ── Agent Query Pipeline State ────────────────────────────────────────────

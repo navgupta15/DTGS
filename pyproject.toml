@@ -5,6 +5,7 @@ description = "Dynamic Tool Generation System (DTGS) — auto-discover LLM tools
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "fastapi>=0.135.2",
     "langchain-core>=1.2.21",
     "langchain-ollama>=1.0.1",
     "langchain-openai>=1.1.12",
@@ -14,6 +15,7 @@ dependencies = [
     "tree-sitter>=0.25.2",
     "tree-sitter-java>=0.23.5",
     "typer>=0.24.1",
+    "uvicorn>=0.42.0",
 ]
 
 [dependency-groups]

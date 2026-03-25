@@ -21,6 +21,8 @@ CREATE TABLE IF NOT EXISTS tools (
     id          TEXT PRIMARY KEY,
     name        TEXT NOT NULL,
     description TEXT,
+    namespace   TEXT DEFAULT 'default',
+    base_url    TEXT DEFAULT '',
     schema_json TEXT NOT NULL,
     source_file TEXT,
     class_name  TEXT,
@@ -32,7 +34,9 @@ CREATE TABLE IF NOT EXISTS tools (
 
 CREATE INDEX IF NOT EXISTS idx_tools_name ON tools(name);
 CREATE INDEX IF NOT EXISTS idx_tools_class ON tools(class_name);
+CREATE INDEX IF NOT EXISTS idx_tools_namespace ON tools(namespace);
 """
+
 
 
 def _pack_embedding(vec: list[float]) -> bytes:
@@ -71,12 +75,21 @@ class ToolRegistry:
     def _init_db(self) -> None:
         with self._connect() as conn:
             conn.executescript(_DDL)
+            # Automatic migration for existing DBs
+            try:
+                conn.execute("ALTER TABLE tools ADD COLUMN namespace TEXT DEFAULT 'default';")
+                conn.execute("ALTER TABLE tools ADD COLUMN base_url TEXT DEFAULT '';")
+                conn.execute("CREATE INDEX IF NOT EXISTS idx_tools_namespace ON tools(namespace);")
+            except sqlite3.OperationalError:
+                pass  # Columns already exist
 
     # ── Write ──────────────────────────────────────────────────────────────
 
     def upsert_tool(
         self,
         schema: dict,
+        namespace: str = "default",
+        base_url: str = "",
         source_file: str = "",
         class_name: str = "",
         method_name: str = "",
@@ -95,26 +108,31 @@ class ToolRegistry:
             conn.execute(
                 """
                 INSERT INTO tools
-                    (id, name, description, schema_json, source_file,
-                     class_name, method_name, is_rest, embedding)
-                VALUES (?,?,?,?,?,?,?,?,?)
+                    (id, name, description, namespace, base_url, schema_json,
+                     source_file, class_name, method_name, is_rest, embedding)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?)
                 ON CONFLICT(id) DO UPDATE SET
                     name=excluded.name,
                     description=excluded.description,
+                    namespace=excluded.namespace,
+                    base_url=excluded.base_url,
                     schema_json=excluded.schema_json,
                     embedding=excluded.embedding
                 """,
                 (
-                    tool_id, name, description, json.dumps(schema),
+                    tool_id, name, description, namespace, base_url, json.dumps(schema),
                     source_file, class_name, method_name,
                     int(is_rest), emb_blob,
                 ),
             )
         return tool_id
 
+
     def upsert_many(
         self,
         schemas: list[dict],
+        namespace: str = "default",
+        base_url: str = "",
         embeddings: list[list[float]] | None = None,
         method_meta: list[dict] | None = None,
     ) -> list[str]:
@@ -123,9 +141,10 @@ class ToolRegistry:
 
         Args:
             schemas:     list of ToolSchema dicts
+            namespace:   multi-tenant namespace
+            base_url:    target API base URL
             embeddings:  optional parallel list of embedding vectors
-            method_meta: optional parallel list of {source_file, class_name,
-                         method_name, is_rest} dicts
+            method_meta: optional parallel list of dicts (source_file, class_name, etc.)
         """
         ids: list[str] = []
         for i, schema in enumerate(schemas):
@@ -133,6 +152,8 @@ class ToolRegistry:
             meta = method_meta[i] if method_meta and i < len(method_meta) else {}
             tid = self.upsert_tool(
                 schema=schema,
+                namespace=namespace,
+                base_url=base_url,
                 source_file=meta.get("source_file", ""),
                 class_name=meta.get("class_name", ""),
                 method_name=meta.get("method_name", ""),
@@ -142,29 +163,32 @@ class ToolRegistry:
             ids.append(tid)
         return ids
 
+
     # ── Read ───────────────────────────────────────────────────────────────
 
-    def keyword_search(self, query: str, top_k: int = 10) -> list[dict]:
-        """LIKE search on name + description. Used when no embeddings exist."""
+    def keyword_search(self, query: str, namespace: str = "default", top_k: int = 10) -> list[dict]:
+        """LIKE search on name + description for a specific namespace."""
         pattern = f"%{query}%"
         with self._connect() as conn:
             rows = conn.execute(
                 """
                 SELECT schema_json FROM tools
-                WHERE name LIKE ? OR description LIKE ?
+                WHERE namespace = ? AND (name LIKE ? OR description LIKE ?)
                 LIMIT ?
                 """,
-                (pattern, pattern, top_k),
+                (namespace, pattern, pattern, top_k),
             ).fetchall()
         return [json.loads(r["schema_json"]) for r in rows]
 
+
     def semantic_search(
-        self, query_embedding: list[float], top_k: int = 10
+        self, query_embedding: list[float], namespace: str = "default", top_k: int = 10
     ) -> list[dict]:
-        """Cosine similarity search over stored embeddings."""
+        """Cosine similarity search over stored embeddings for a specific namespace."""
         with self._connect() as conn:
             rows = conn.execute(
-                "SELECT schema_json, embedding FROM tools WHERE embedding IS NOT NULL"
+                "SELECT schema_json, embedding FROM tools WHERE namespace = ? AND embedding IS NOT NULL",
+                (namespace,)
             ).fetchall()
 
         scored: list[tuple[float, dict]] = []
@@ -176,25 +200,31 @@ class ToolRegistry:
         scored.sort(key=lambda x: x[0], reverse=True)
         return [schema for _, schema in scored[:top_k]]
 
+
     def search(
         self,
         query: str,
+        namespace: str = "default",
         query_embedding: list[float] | None = None,
         top_k: int = 10,
     ) -> list[dict]:
-        """Unified search: semantic if embedding provided, else keyword."""
+        """Unified search: semantic if embedding provided, else keyword. Filters by namespace."""
         if query_embedding:
-            return self.semantic_search(query_embedding, top_k)
-        return self.keyword_search(query, top_k)
+            return self.semantic_search(query_embedding, namespace, top_k)
+        return self.keyword_search(query, namespace, top_k)
 
-    def get_all(self, limit: int = 500) -> list[dict]:
-        """Return all stored tool schemas."""
+
+    def get_all(self, namespace: str = "default", limit: int = 500) -> list[dict]:
+        """Return all stored tool schemas for a specific namespace."""
         with self._connect() as conn:
             rows = conn.execute(
-                "SELECT schema_json FROM tools LIMIT ?", (limit,)
+                "SELECT schema_json FROM tools WHERE namespace = ? LIMIT ?",
+                (namespace, limit)
             ).fetchall()
         return [json.loads(r["schema_json"]) for r in rows]
 
-    def count(self) -> int:
+    def count(self, namespace: str | None = None) -> int:
         with self._connect() as conn:
+            if namespace:
+                return conn.execute("SELECT COUNT(*) FROM tools WHERE namespace = ?", (namespace,)).fetchone()[0]
             return conn.execute("SELECT COUNT(*) FROM tools").fetchone()[0]

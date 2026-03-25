@@ -129,6 +129,8 @@ def analyze_local(
 def ingest(
     github_url: str = typer.Argument(..., help="Public GitHub repo URL to ingest"),
     registry: Path = typer.Option(Path("dtgs.db"), "--registry", "-r", help="SQLite registry path"),
+    namespace: str = typer.Option("default", "--namespace", help="Multi-tenant namespace for these tools"),
+    base_url: str = typer.Option("", "--base-url", help="Base URL where this API runs (e.g. https://api.myapp.com)"),
 ) -> None:
     """
     Clone, analyze, and store tools into the SQLite registry (Graph 1).
@@ -138,9 +140,16 @@ def ingest(
     from toolmaker.graphs.ingestion_graph import run_ingestion
 
     console.print(f"[bold]Running DTGS Ingestion Graph[/] for {github_url}")
-    console.print(f"[dim]Registry:[/] {registry}")
+    console.print(f"[dim]Namespace:[/] {namespace}")
+    console.print(f"[dim]Base URL:[/]  {base_url or '(none)'}")
+    console.print(f"[dim]Registry:[/]  {registry}")
 
-    result = run_ingestion(github_url=github_url, registry_path=str(registry))
+    result = run_ingestion(
+        github_url=github_url,
+        registry_path=str(registry),
+        namespace=namespace,
+        base_url=base_url,
+    )
 
     if result.get("error"):
         console.print(f"[bold red]Ingestion failed:[/] {result['error']}")
@@ -187,5 +196,31 @@ def run_agent_cmd(
             break
 
 
+@app.command()
+def serve(
+    host: str = typer.Option("127.0.0.1", "--host", help="Host IP to bind to"),
+    port: int = typer.Option(8000, "--port", help="Port to bind to"),
+    registry: Path = typer.Option(Path("dtgs.db"), "--registry", "-r", help="SQLite registry path"),
+) -> None:
+    """
+    Start the DTGS FastAPI Catalog Server.
+    
+    Exposes extracted tools as OpenAPI schemas at: 
+    GET /api/v1/{namespace}/openapi.json
+    """
+    import uvicorn
+    from toolmaker.server.catalog import app as catalog_app
+
+    # Inject the registry path into FastAPI state so it knows which db to read
+    catalog_app.state.registry_path = str(registry)
+    
+    console.print(f"[bold green]Starting DTGS Catalog Server[/] on {host}:{port}")
+    console.print(f"[dim]Registry:[/] {registry}")
+    console.print(f"[dim]Endpoints:[/] GET /api/v1/{{namespace}}/openapi.json")
+    
+    uvicorn.run(catalog_app, host=host, port=port)
+
+
 if __name__ == "__main__":
     app()
+

@@ -66,6 +66,8 @@ def fan_out_analysis(state: IngestionState) -> list[Send] | str:
             FileAnalysisState(
                 file_path=f,
                 registry_path=state.get("registry_path", "dtgs.db"),
+                namespace=state.get("namespace", "default"),
+                base_url=state.get("base_url", ""),
             ),
         )
         for f in files
@@ -124,6 +126,8 @@ def store_registry(state: IngestionState) -> dict:
 
     ids = registry.upsert_many(
         schemas=schemas,
+        namespace=state.get("namespace", "default"),
+        base_url=state.get("base_url", ""),
         embeddings=aligned_emb,
         method_meta=aligned_meta,
     )
