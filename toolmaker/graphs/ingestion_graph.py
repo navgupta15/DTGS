@@ -87,6 +87,7 @@ def run_ingestion(
     namespace: str = "default",
     base_url: str = "",
     enhance_descriptions: bool = True,
+    include_patterns: list[str] | None = None,
 ) -> dict:
     """
     Convenience wrapper: clone, analyze, and store tools from a GitHub repo.
@@ -96,6 +97,7 @@ def run_ingestion(
         registry_path: Path to the SQLite DB file (created if not exists).
         namespace:     Multi-tenant namespace (e.g. "service_a")
         base_url:      Target API base URL.
+        include_patterns: Optional list of substrings to filter packages.
 
     Returns:
         Final IngestionState dict.
@@ -107,6 +109,7 @@ def run_ingestion(
         "namespace": namespace,
         "base_url": base_url,
         "enhance_descriptions": enhance_descriptions,
+        "include_patterns": include_patterns,
         "repo_path": "",
 
         "error": None,

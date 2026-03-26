@@ -24,6 +24,7 @@ class IngestionState(TypedDict):
     registry_path: str               # path to the SQLite DB file
     namespace: str                   # multi-tenant namespace (e.g. "service_a")
     base_url: str                    # target API base URL (e.g. "https://api.myapp.com")
+    include_patterns: list[str] | None # list of strings to filter file paths
 
     # ── After clone_repo ──────────────────────────────────────────────────
     repo_path: str                   # temp directory with cloned repo

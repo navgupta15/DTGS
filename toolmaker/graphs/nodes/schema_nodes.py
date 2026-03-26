@@ -19,6 +19,26 @@ def generate_schemas(state: IngestionState) -> dict:
     """
     from toolmaker.models import AnalyzedMethod, JavaParameter
     from toolmaker.analyzer.schema_generator import method_to_tool_schema
+    from toolmaker.registry.sqlite_registry import ToolRegistry
+    import hashlib
+    import json
+
+    registry = ToolRegistry(state.get("registry_path", "dtgs.db"))
+    namespace = state.get("namespace", "default")
+
+    # Fetch existing tools and build a lookup
+    existing_tools = {}
+    with registry._connect() as conn:
+        rows = conn.execute("SELECT name, method_hash, description, embedding FROM tools WHERE namespace = ?", (namespace,)).fetchall()
+        for r in rows:
+            from toolmaker.registry.sqlite_registry import _unpack_embedding
+            emb_blob = r["embedding"]
+            emb = _unpack_embedding(emb_blob) if emb_blob else None
+            existing_tools[r["name"]] = {
+                "hash": r["method_hash"],
+                "description": r["description"],
+                "embedding": emb,
+            }
 
     schemas: list[dict] = []
     for raw in state.get("analyzed_methods", []):
@@ -26,7 +46,23 @@ def generate_schemas(state: IngestionState) -> dict:
         params = [JavaParameter(**p) for p in raw.get("parameters", [])]
         method = AnalyzedMethod(**{**raw, "parameters": params})
         schema = method_to_tool_schema(method)
-        schemas.append(schema.model_dump())
+        schema_dict = schema.model_dump()
+        
+        # Calculate robust hash of the raw tool JSON before enhancement
+        func_dump = json.dumps(schema_dict.get("function", {}), sort_keys=True)
+        method_hash = hashlib.md5(func_dump.encode()).hexdigest()
+        schema_dict["__method_hash"] = method_hash
+        
+        name = schema_dict.get("function", {}).get("name")
+        
+        # Cache check
+        if name in existing_tools and existing_tools[name]["hash"] == method_hash:
+            schema_dict["__skip_enhance"] = True
+            schema_dict["function"]["description"] = existing_tools[name]["description"]
+            if existing_tools[name]["embedding"]:
+                schema_dict["__cached_embedding"] = existing_tools[name]["embedding"]
+                
+        schemas.append(schema_dict)
 
     return {"tool_schemas": schemas}
 
@@ -66,6 +102,10 @@ def enhance_descriptions(state: IngestionState) -> dict:
     for schema in schemas:
         func = schema.get("function", {})
         if not func:
+            enhanced_schemas.append(schema)
+            continue
+            
+        if schema.get("__skip_enhance"):
             enhanced_schemas.append(schema)
             continue
             
@@ -113,16 +153,28 @@ def embed_tools(state: IngestionState) -> dict:
         from openai import OpenAI
 
         client = OpenAI(api_key=api_key)
-        texts = [
-            s.get("function", {}).get("description", s.get("function", {}).get("name", ""))
-            for s in schemas
-        ]
+        
+        texts_to_embed = []
+        indices_to_embed = []
+        embeddings: list[list[float] | None] = [None] * len(schemas)
+        
+        for i, s in enumerate(schemas):
+            if "__cached_embedding" in s and s["__cached_embedding"] is not None:
+                embeddings[i] = s["__cached_embedding"]
+            else:
+                text = s.get("function", {}).get("description", s.get("function", {}).get("name", ""))
+                texts_to_embed.append(text)
+                indices_to_embed.append(i)
 
-        response = client.embeddings.create(
-            model="text-embedding-3-small",
-            input=texts,
-        )
-        embeddings = [item.embedding for item in response.data]
+        if texts_to_embed:
+            response = client.embeddings.create(
+                model="text-embedding-3-small",
+                input=texts_to_embed,
+            )
+            for text_idx, data_item in enumerate(response.data):
+                orig_idx = indices_to_embed[text_idx]
+                embeddings[orig_idx] = data_item.embedding
+                
         return {"embeddings": embeddings}
 
     except Exception as exc:
@@ -131,4 +183,6 @@ def embed_tools(state: IngestionState) -> dict:
             f"[DTGS] Embedding failed, falling back to keyword search: {exc}",
             stacklevel=2,
         )
-        return {"embeddings": []}
+        # If partial failure, those hit cache will still have it. The others will be empty.
+        # It's safest to return the partially filled array.
+        return {"embeddings": embeddings}

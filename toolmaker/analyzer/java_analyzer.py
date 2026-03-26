@@ -335,12 +335,13 @@ def analyze_file(path: Path) -> list[AnalyzedMethod]:
     return methods
 
 
-def analyze_directory(root: Path) -> list[AnalyzedMethod]:
+def analyze_directory(root: Path, include_patterns: list[str] | None = None) -> list[AnalyzedMethod]:
     """
     Analyze all .java files under a directory.
 
     Args:
         root: Root directory to search.
+        include_patterns: Optional list of path substrings to filter files.
 
     Returns:
         Flat list of all AnalyzedMethod instances across all files.
@@ -348,7 +349,7 @@ def analyze_directory(root: Path) -> list[AnalyzedMethod]:
     from toolmaker.ingestion.github import find_java_files
 
     all_methods: list[AnalyzedMethod] = []
-    java_files = find_java_files(root)
+    java_files = find_java_files(root, include_patterns=include_patterns)
 
     for java_file in java_files:
         try:

@@ -41,7 +41,8 @@ def discover_files(state: IngestionState) -> dict:
     Walk the cloned repo and collect all .java file paths.
     """
     root = Path(state["repo_path"])
-    java_files = [str(p) for p in find_java_files(root)]
+    patterns = state.get("include_patterns")
+    java_files = [str(p) for p in find_java_files(root, include_patterns=patterns)]
     return {"java_files": java_files}
 
 

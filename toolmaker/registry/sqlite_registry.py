@@ -29,13 +29,16 @@ CREATE TABLE IF NOT EXISTS tools (
     method_name TEXT,
     is_rest     INTEGER DEFAULT 0,
     embedding   BLOB,
+    method_hash TEXT,
     created_at  DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX IF NOT EXISTS idx_tools_name ON tools(name);
 CREATE INDEX IF NOT EXISTS idx_tools_class ON tools(class_name);
 CREATE INDEX IF NOT EXISTS idx_tools_namespace ON tools(namespace);
+CREATE INDEX IF NOT EXISTS idx_tools_hash ON tools(method_hash);
 """
+
 
 
 
@@ -83,7 +86,18 @@ class ToolRegistry:
             except sqlite3.OperationalError:
                 pass  # Columns already exist
 
+            try:
+                conn.execute("ALTER TABLE tools ADD COLUMN method_hash TEXT;")
+                conn.execute("CREATE INDEX IF NOT EXISTS idx_tools_hash ON tools(method_hash);")
+            except sqlite3.OperationalError:
+                pass
+
     # ── Write ──────────────────────────────────────────────────────────────
+    
+    def delete_namespace(self, namespace: str) -> None:
+        """Delete all tools for the given namespace."""
+        with self._connect() as conn:
+            conn.execute("DELETE FROM tools WHERE namespace = ?", (namespace,))
 
     def upsert_tool(
         self,
@@ -95,12 +109,16 @@ class ToolRegistry:
         method_name: str = "",
         is_rest: bool = False,
         embedding: list[float] | None = None,
+        method_hash: str | None = None,
     ) -> str:
         """Insert or replace a tool record. Returns the tool ID."""
-        tool_id = str(uuid.uuid4())
+        import hashlib
         func = schema.get("function", {})
         name = func.get("name", "unknown")
         description = func.get("description", "")
+        
+        # Deterministic ID based on namespace + name so it updates on conflict
+        tool_id = str(uuid.uuid5(uuid.NAMESPACE_URL, f"dtgs://{namespace}/{name}"))
 
         emb_blob = _pack_embedding(embedding) if embedding else None
 
@@ -109,20 +127,21 @@ class ToolRegistry:
                 """
                 INSERT INTO tools
                     (id, name, description, namespace, base_url, schema_json,
-                     source_file, class_name, method_name, is_rest, embedding)
-                VALUES (?,?,?,?,?,?,?,?,?,?,?)
+                     source_file, class_name, method_name, is_rest, embedding, method_hash)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
                 ON CONFLICT(id) DO UPDATE SET
                     name=excluded.name,
                     description=excluded.description,
                     namespace=excluded.namespace,
                     base_url=excluded.base_url,
                     schema_json=excluded.schema_json,
-                    embedding=excluded.embedding
+                    embedding=excluded.embedding,
+                    method_hash=excluded.method_hash
                 """,
                 (
                     tool_id, name, description, namespace, base_url, json.dumps(schema),
                     source_file, class_name, method_name,
-                    int(is_rest), emb_blob,
+                    int(is_rest), emb_blob, method_hash
                 ),
             )
         return tool_id
@@ -159,6 +178,7 @@ class ToolRegistry:
                 method_name=meta.get("method_name", ""),
                 is_rest=meta.get("is_rest", False),
                 embedding=emb,
+                method_hash=meta.get("method_hash", None),
             )
             ids.append(tid)
         return ids

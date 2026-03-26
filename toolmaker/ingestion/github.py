@@ -59,25 +59,34 @@ def clone_repo(url: str, dest: Path | None = None) -> Path:
     return dest
 
 
-def find_java_files(root: Path) -> list[Path]:
+def find_java_files(root: Path, include_patterns: list[str] | None = None) -> list[Path]:
     """
     Recursively find all .java source files under a directory.
 
-    Excludes common non-source paths: .git, target, build, .gradle, out.
+    Excludes common non-source paths: .git, target, build, .gradle, out, test, tests.
+    Optionally filters files using include_patterns.
 
     Args:
         root: Repository root directory.
+        include_patterns: Optional list of path substrings to filter packages.
 
     Returns:
         Sorted list of absolute paths to .java files.
     """
-    excluded_dirs = {".git", "target", "build", ".gradle", "out", ".idea"}
+    excluded_dirs = {".git", "target", "build", ".gradle", "out", ".idea", "test", "tests"}
 
     java_files: list[Path] = []
     for path in root.rglob("*.java"):
-        # Skip if any parent dir is in excluded set
-        if not any(part in excluded_dirs for part in path.parts):
-            java_files.append(path)
+        # Skip if any parent dir is in excluded set (ignoring case for test/tests if necessary, but exact match is fine usually)
+        if any(part.lower() in excluded_dirs for part in path.parts):
+            continue
+            
+        if include_patterns:
+            path_str = str(path).replace('\\', '/')
+            if not any(pattern in path_str for pattern in include_patterns):
+                continue
+
+        java_files.append(path)
 
     return sorted(java_files)
 

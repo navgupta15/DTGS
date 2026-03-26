@@ -14,6 +14,10 @@ import os
 import sys
 from pathlib import Path
 
+# Load .env file automatically for LLM configurations
+from dotenv import load_dotenv
+load_dotenv()
+
 # Force UTF-8 on Windows consoles before importing Rich
 if sys.platform == "win32":
     os.environ.setdefault("PYTHONIOENCODING", "utf-8")
@@ -33,12 +37,25 @@ console = Console()
 
 # ── Shared helpers ─────────────────────────────────────────────────────────
 
-def _run_analysis(root: Path, public_only: bool, output: Path | None) -> None:
+def _read_include_file(file_path: Path | None) -> list[str] | None:
+    if not file_path:
+        return None
+    if not file_path.exists():
+        console.print(f"[bold yellow]Warning:[/] Include file not found: {file_path}")
+        return None
+    patterns = [line.strip() for line in file_path.read_text().splitlines() if line.strip()]
+    return patterns if patterns else None
+
+
+def _run_analysis(root: Path, public_only: bool, output: Path | None, include_patterns: list[str] | None = None) -> None:
     from toolmaker.analyzer.java_analyzer import analyze_directory
     from toolmaker.analyzer.schema_generator import methods_to_tool_schemas
 
     console.print(f"[bold cyan]Scanning Java files in:[/] {root}")
-    methods = analyze_directory(root)
+    if include_patterns:
+        console.print(f"[dim]Filtering using {len(include_patterns)} patterns.[/]")
+        
+    methods = analyze_directory(root, include_patterns=include_patterns)
 
     if not methods:
         console.print("[yellow]No Java methods found.[/]")
@@ -92,10 +109,12 @@ def analyze(
     output: Path | None = typer.Option(None, "--output", "-o"),
     public_only: bool = typer.Option(False, "--public-only"),
     keep: bool = typer.Option(False, "--keep", help="Keep cloned repo"),
+    include_file: Path | None = typer.Option(None, "--include-file", help="Text file containing list of package paths/patterns to scan"),
 ) -> None:
     """Clone a GitHub repo and print Java tool schemas (no registry)."""
     from toolmaker.ingestion.github import clone_repo, cleanup_repo
 
+    includes = _read_include_file(include_file)
     console.print(f"[bold]Cloning[/] {github_url} ...")
     try:
         repo_path = clone_repo(github_url)
@@ -105,11 +124,34 @@ def analyze(
 
     console.print(f"[green]OK[/] Cloned to {repo_path}")
     try:
-        _run_analysis(repo_path, public_only=public_only, output=output)
+        _run_analysis(repo_path, public_only=public_only, output=output, include_patterns=includes)
     finally:
         if not keep:
             cleanup_repo(repo_path)
             console.print("[dim]Cleaned up temporary clone.[/]")
+
+
+@app.command()
+def delete(
+    namespace: str = typer.Argument(..., help="Namespace to delete from the registry"),
+    registry: Path = typer.Option(Path("dtgs.db"), "--registry", "-r", help="SQLite registry path"),
+) -> None:
+    """Delete all tools for a given namespace from the registry."""
+    from toolmaker.registry.sqlite_registry import ToolRegistry
+
+    if not registry.exists():
+        console.print(f"[bold red]Error:[/] Registry {registry} not found.")
+        raise typer.Exit(code=1)
+
+    db = ToolRegistry(str(registry))
+    count_before = db.count(namespace=namespace)
+    
+    if count_before == 0:
+        console.print(f"[yellow]No tools found for namespace '{namespace}'.[/]")
+        return
+        
+    db.delete_namespace(namespace)
+    console.print(f"[bold green]Deleted {count_before} tools from namespace '{namespace}'.[/]")
 
 
 @app.command(name="analyze-local")
@@ -117,12 +159,15 @@ def analyze_local(
     path: Path = typer.Argument(..., help="Local Java project path"),
     output: Path | None = typer.Option(None, "--output", "-o"),
     public_only: bool = typer.Option(False, "--public-only"),
+    include_file: Path | None = typer.Option(None, "--include-file", help="Text file containing list of package paths/patterns to scan"),
 ) -> None:
     """Analyze a local Java codebase and print tool schemas (no registry)."""
     if not path.exists():
         console.print(f"[bold red]Error:[/] Path does not exist: {path}")
         raise typer.Exit(code=1)
-    _run_analysis(path, public_only=public_only, output=output)
+        
+    includes = _read_include_file(include_file)
+    _run_analysis(path, public_only=public_only, output=output, include_patterns=includes)
 
 
 @app.command()
@@ -132,6 +177,7 @@ def ingest(
     namespace: str = typer.Option("default", "--namespace", help="Multi-tenant namespace for these tools"),
     base_url: str = typer.Option("", "--base-url", help="Base URL where this API runs (e.g. https://api.myapp.com)"),
     enhance: bool = typer.Option(True, "--enhance/--no-enhance", help="Use LLM to rewrite and enhance tool descriptions"),
+    include_file: Path | None = typer.Option(None, "--include-file", help="Text file containing list of package paths/patterns to scan"),
 ) -> None:
     """
     Clone, analyze, and store tools into the SQLite registry (Graph 1).
@@ -140,11 +186,15 @@ def ingest(
     """
     from toolmaker.graphs.ingestion_graph import run_ingestion
 
+    includes = _read_include_file(include_file)
+
     console.print(f"[bold]Running DTGS Ingestion Graph[/] for {github_url}")
     console.print(f"[dim]Namespace:[/] {namespace}")
     console.print(f"[dim]Base URL:[/]  {base_url or '(none)'}")
     console.print(f"[dim]Enhance:[/]   {'Yes (LLM)' if enhance else 'No'}")
     console.print(f"[dim]Registry:[/]  {registry}")
+    if includes:
+        console.print(f"[dim]Includes:[/]  Loaded {len(includes)} patterns")
 
     result = run_ingestion(
         github_url=github_url,
@@ -152,6 +202,7 @@ def ingest(
         namespace=namespace,
         base_url=base_url,
         enhance_descriptions=enhance,
+        include_patterns=includes,
     )
 
     if result.get("error"):

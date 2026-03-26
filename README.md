@@ -23,6 +23,15 @@ FastAPI Server — OpenAPI Catalog:
              → Chatbot makes direct HTTP execution calls to your Java backend
 ```
 
+```
+
+### 🧠 Smart Delta Caching (Ingestion Optimization)
+DTGS calculates a deterministic cryptographic hash for every method it analyzes. If you re-run an ingestion on the same repository, DTGS perfectly bypasses expensive LLM API calls and Embedding API calls for methods that haven't structurally changed since the last run.
+
+### 🧹 Path Filtering & Automatic Test Exclusion 
+By default, DTGS ignores common non-source directories as well as `test` and `tests` directories to ensure your agent's tools aren't cluttered with mock functions.
+Additionally, you can supply an `--include-file` to aggressively limit the scan to exact package paths.
+
 ---
 
 ## Installation
@@ -111,7 +120,7 @@ uv run python cli.py run-agent "find all pets by owner ID" --registry petclinic.
 
 ### Environment Variable Reference
 
-DTGS needs to know where to send its LLM reasoning tasks.
+DTGS automatically loads `.env` files from your working directory. It needs to know where to send its LLM reasoning tasks.
 
 | Variable             | Description                                          | Default                 |
 |----------------------|------------------------------------------------------|-------------------------|
@@ -137,6 +146,13 @@ uv run python cli.py serve --port 8000
 # [Ingestion] Populate a namespace in the SQLite registry
 # NOTE: Uses the LLM to write fantastic descriptions for the tools by default!
 uv run python cli.py ingest https://github.com/owner/repo --namespace service_a --base-url "https://api.a.com"
+
+# [Targeted Ingestion] Only scan specific packages listed in a file
+echo "com/petclinic/owner" > packages.txt
+uv run python cli.py ingest https://github.com/owner/repo --namespace service_a --include-file packages.txt
+
+# [Registry Management] Delete an entire namespace from the database
+uv run python cli.py delete service_a
 
 # [Offline Export] Save the exact openapi.json file for a namespace locally
 uv run python cli.py export --namespace service_a --output my_api_spec.json
