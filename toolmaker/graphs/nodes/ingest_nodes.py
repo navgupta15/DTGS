@@ -15,6 +15,7 @@ from toolmaker.graphs.state import FileAnalysisState, IngestionState
 from toolmaker.ingestion.github import cleanup_repo
 from toolmaker.ingestion.github import clone_repo as _clone_repo
 from toolmaker.ingestion.github import find_java_files
+from toolmaker.logger import logger
 
 
 # ── Node 1: clone_repo ────────────────────────────────────────────────────
@@ -43,6 +44,7 @@ def discover_files(state: IngestionState) -> dict:
     root = Path(state["repo_path"])
     patterns = state.get("include_patterns")
     java_files = [str(p) for p in find_java_files(root, include_patterns=patterns)]
+    logger.info(f"Discovered {len(java_files)} Java files to analyze.")
     return {"java_files": java_files}
 
 
@@ -87,6 +89,7 @@ def analyze_file(state: FileAnalysisState) -> dict:
     from toolmaker.analyzer.java_analyzer import analyze_file as _analyze
 
     path = Path(state["file_path"])
+    logger.debug(f"Parsing AST for Java file: {path.name}")
     try:
         methods = _analyze(path)
         return {"analyzed_methods": [m.model_dump() for m in methods]}
@@ -142,4 +145,5 @@ def store_registry(state: IngestionState) -> dict:
         f"{len(set(m.get('source_file','') for m in methods_raw))} Java files "
         f"into registry '{state.get('registry_path', 'dtgs.db')}'."
     )
+    logger.info(summary)
     return {"registry_ids": ids, "summary": summary}

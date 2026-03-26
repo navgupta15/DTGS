@@ -9,6 +9,7 @@ from __future__ import annotations
 import os
 
 from toolmaker.graphs.state import IngestionState
+from toolmaker.logger import logger
 
 
 # ── Node: generate_schemas ────────────────────────────────────────────────
@@ -57,6 +58,7 @@ def generate_schemas(state: IngestionState) -> dict:
         
         # Cache check
         if name in existing_tools and existing_tools[name]["hash"] == method_hash:
+            logger.debug(f"Cache hit for schema: {name}")
             schema_dict["__skip_enhance"] = True
             schema_dict["function"]["description"] = existing_tools[name]["description"]
             if existing_tools[name]["embedding"]:
@@ -90,6 +92,13 @@ def enhance_descriptions(state: IngestionState) -> dict:
 
     enhanced_schemas = []
     
+    # Just to count how many we actually need to enhance
+    to_enhance = sum(1 for s in schemas if not s.get("__skip_enhance") and s.get("function"))
+    if to_enhance > 0:
+        logger.info(f"Enhancing {to_enhance} schema descriptions using LLM...")
+    else:
+        logger.info("All schemas hit the cache. Skipping LLM enhancement.")
+        
     from langchain_core.messages import HumanMessage, SystemMessage
     
     sys_prompt = SystemMessage(
@@ -167,6 +176,7 @@ def embed_tools(state: IngestionState) -> dict:
                 indices_to_embed.append(i)
 
         if texts_to_embed:
+            logger.info(f"Generating embeddings for {len(texts_to_embed)} tools...")
             response = client.embeddings.create(
                 model="text-embedding-3-small",
                 input=texts_to_embed,

@@ -13,6 +13,8 @@ import uuid
 from pathlib import Path
 from typing import Any
 
+from toolmaker.logger import logger
+
 
 # ── Schema ─────────────────────────────────────────────────────────────────
 
@@ -96,6 +98,7 @@ class ToolRegistry:
     
     def delete_namespace(self, namespace: str) -> None:
         """Delete all tools for the given namespace."""
+        logger.info(f"Deleting namespace '{namespace}' from registry")
         with self._connect() as conn:
             conn.execute("DELETE FROM tools WHERE namespace = ?", (namespace,))
 
@@ -144,6 +147,7 @@ class ToolRegistry:
                     int(is_rest), emb_blob, method_hash
                 ),
             )
+        logger.debug(f"Upserted tool '{name}' into namespace '{namespace}' (id: {tool_id})")
         return tool_id
 
 
@@ -181,6 +185,7 @@ class ToolRegistry:
                 method_hash=meta.get("method_hash", None),
             )
             ids.append(tid)
+        logger.info(f"Bulk upserted {len(ids)} tools into namespace '{namespace}'")
         return ids
 
 

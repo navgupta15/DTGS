@@ -12,8 +12,7 @@ from pydantic import BaseModel
 
 from toolmaker.registry.sqlite_registry import ToolRegistry
 from toolmaker.registry.openapi_generator import generate_openapi_spec
-
-logger = logging.getLogger("dtgs.server")
+from toolmaker.logger import logger
 
 
 @asynccontextmanager
@@ -39,6 +38,7 @@ async def get_openapi_spec(request: Request, namespace: str):
     """
     Returns the complete OpenAPI 3.1.0 JSON specification for the requested namespace.
     """
+    logger.info(f"Serving OpenAPI spec for namespace: '{namespace}'")
     registry: ToolRegistry = request.app.state.registry
     
     # We load limit=500 for now. For a massive microservice we'd want pagination
@@ -87,6 +87,7 @@ async def ingest_repo(request: Request, payload: IngestRequest):
     """
     from toolmaker.graphs.ingestion_graph import run_ingestion
     
+    logger.info(f"Dynamic ingestion requested for repo: {payload.github_url} (namespace: {payload.namespace})")
     db_path = getattr(request.app.state, "registry_path", "dtgs.db")
     
     # Run the ingestion synchronously (could be punted to background task later)

@@ -110,8 +110,12 @@ def analyze(
     public_only: bool = typer.Option(False, "--public-only"),
     keep: bool = typer.Option(False, "--keep", help="Keep cloned repo"),
     include_file: Path | None = typer.Option(None, "--include-file", help="Text file containing list of package paths/patterns to scan"),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose trace logging"),
 ) -> None:
     """Clone a GitHub repo and print Java tool schemas (no registry)."""
+    from toolmaker.logger import setup_logger
+    logger = setup_logger(level="DEBUG" if verbose else "INFO")
+    
     from toolmaker.ingestion.github import clone_repo, cleanup_repo
 
     includes = _read_include_file(include_file)
@@ -160,8 +164,11 @@ def analyze_local(
     output: Path | None = typer.Option(None, "--output", "-o"),
     public_only: bool = typer.Option(False, "--public-only"),
     include_file: Path | None = typer.Option(None, "--include-file", help="Text file containing list of package paths/patterns to scan"),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose trace logging"),
 ) -> None:
     """Analyze a local Java codebase and print tool schemas (no registry)."""
+    from toolmaker.logger import setup_logger
+    logger = setup_logger(level="DEBUG" if verbose else "INFO")
     if not path.exists():
         console.print(f"[bold red]Error:[/] Path does not exist: {path}")
         raise typer.Exit(code=1)
@@ -178,12 +185,16 @@ def ingest(
     base_url: str = typer.Option("", "--base-url", help="Base URL where this API runs (e.g. https://api.myapp.com)"),
     enhance: bool = typer.Option(True, "--enhance/--no-enhance", help="Use LLM to rewrite and enhance tool descriptions"),
     include_file: Path | None = typer.Option(None, "--include-file", help="Text file containing list of package paths/patterns to scan"),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose trace logging"),
 ) -> None:
     """
     Clone, analyze, and store tools into the SQLite registry (Graph 1).
 
     This runs the full LangGraph Ingestion Pipeline.
     """
+    from toolmaker.logger import setup_logger
+    logger = setup_logger(level="DEBUG" if verbose else "INFO")
+    
     from toolmaker.graphs.ingestion_graph import run_ingestion
 
     includes = _read_include_file(include_file)
@@ -255,6 +266,7 @@ def serve(
     host: str = typer.Option("127.0.0.1", "--host", help="Host IP to bind to"),
     port: int = typer.Option(8000, "--port", help="Port to bind to"),
     registry: Path = typer.Option(Path("dtgs.db"), "--registry", "-r", help="SQLite registry path"),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose trace logging"),
 ) -> None:
     """
     Start the DTGS FastAPI Catalog Server.
@@ -262,6 +274,9 @@ def serve(
     Exposes extracted tools as OpenAPI schemas at: 
     GET /api/v1/{namespace}/openapi.json
     """
+    from toolmaker.logger import setup_logger
+    logger = setup_logger(level="DEBUG" if verbose else "INFO")
+    
     import uvicorn
     from toolmaker.server.catalog import app as catalog_app
 

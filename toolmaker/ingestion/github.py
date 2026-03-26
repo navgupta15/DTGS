@@ -8,6 +8,8 @@ import tempfile
 import shutil
 from pathlib import Path
 
+from toolmaker.logger import logger
+
 
 # REST annotation names to detect (Spring Boot + Jakarta)
 REST_ANNOTATION_NAMES = {
@@ -37,6 +39,7 @@ def clone_repo(url: str, dest: Path | None = None) -> Path:
     if dest is None:
         dest = Path(tempfile.mkdtemp(prefix="toolmaker_"))
 
+    logger.info(f"Cloning repository: {url}")
     try:
         result = subprocess.run(
             ["git", "clone", "--depth", "1", "--quiet", url, str(dest)],
@@ -56,6 +59,7 @@ def clone_repo(url: str, dest: Path | None = None) -> Path:
             f"git stderr: {result.stderr.strip()}"
         )
 
+    logger.debug(f"Successfully cloned repository into {dest}")
     return dest
 
 
