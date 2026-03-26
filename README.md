@@ -30,7 +30,7 @@ DTGS calculates a deterministic cryptographic hash for every method it analyzes.
 
 ### 🧹 Path Filtering & Automatic Test Exclusion 
 By default, DTGS ignores common non-source directories as well as `test` and `tests` directories to ensure your agent's tools aren't cluttered with mock functions.
-Additionally, you can supply an `--include-file` to aggressively limit the scan to exact package paths.
+Additionally, you can supply an `--include-file` to aggressively limit the scan to exact package paths. The text file should simply contain **one package or folder substring per line**.
 
 ---
 
@@ -51,21 +51,31 @@ uv sync
 
 ## Quick Start
 
-### Step 1 — Ingest a generic repository into a namespace
+### Step 1 — Create a Package Filter File (Optional but Recommended)
+
+Create a `packages.txt` file (one path substring per line) to only scan relevant packages.
+
+```text
+com/petclinic/owner
+com/petclinic/vet
+```
+
+### Step 2 — Ingest a repository into a namespace
 
 ```bash
 uv run python cli.py ingest https://github.com/spring-projects/spring-petclinic \
    --namespace petclinic \
-   --base-url "http://localhost:8080"
+   --base-url "http://localhost:8080" \
+   --include-file packages.txt
 ```
 
-### Step 2 — Start the OpenAPI Catalog Server
+### Step 3 — Start the OpenAPI Catalog Server
 
 ```bash
 uv run python cli.py serve --port 8000
 ```
 
-### Step 3 — Hook up your Chatbot
+### Step 4 — Hook up your Chatbot
 
 Point ChatGPT Custom Actions, LangChain, or Claude to:
 **`http://localhost:8000/api/v1/petclinic/openapi.json`**
