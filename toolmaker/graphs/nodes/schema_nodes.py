@@ -108,6 +108,7 @@ def enhance_descriptions(state: IngestionState) -> dict:
                 "and when an AI should use it. Only output the new description, nothing else."
     )
 
+    current_idx = 0
     for schema in schemas:
         func = schema.get("function", {})
         if not func:
@@ -118,24 +119,30 @@ def enhance_descriptions(state: IngestionState) -> dict:
             enhanced_schemas.append(schema)
             continue
             
+        current_idx += 1
+        name = func.get("name")
         params = func.get("parameters", {})
         prompt = (
-            f"Tool Name: {func.get('name')}\n"
+            f"Tool Name: {name}\n"
             f"Current Description: {func.get('description')}\n"
             f"Parameters: {params}\n\n"
             "Write the new description strictly."
         )
+        
+        logger.info(f"[{current_idx}/{to_enhance}] Calling LLM for tool: {name}")
         
         try:
             # invoke the LLM
             response = model.invoke([sys_prompt, HumanMessage(content=prompt)])
             new_desc = response.content.strip()
             
+            logger.debug(f"LLM rewrote '{name}' description to: {new_desc}")
+            
             # Update the schema inline
             func["description"] = new_desc
             enhanced_schemas.append(schema)
         except Exception as e:
-            warnings.warn(f"[DTGS] LLM enhancement failed for {func.get('name')}: {e}", stacklevel=2)
+            warnings.warn(f"[DTGS] LLM enhancement failed for {name}: {e}", stacklevel=2)
             enhanced_schemas.append(schema)
 
     return {"tool_schemas": enhanced_schemas}
