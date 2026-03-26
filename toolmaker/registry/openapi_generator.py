@@ -6,7 +6,7 @@ from __future__ import annotations
 import re
 
 
-def _parse_rest_annotation(description: str) -> tuple[str, str]:
+def _parse_rest_annotation(name: str, description: str) -> tuple[str, str]:
     """
     Extract the HTTP method and path from the tool description.
     Expected format: "REST endpoint (@GetMapping(\"/api/pets\")): ..."
@@ -14,7 +14,7 @@ def _parse_rest_annotation(description: str) -> tuple[str, str]:
     """
     match = re.search(r"@([A-Z][a-zA-Z]+Mapping)(?:\(\s*[\"']([^\"']+)[\"']\s*\))?", description)
     if not match:
-        return "post", "/rpc/unknown"
+        return "post", f"/rpc/{name}"
     
     annotation_name = match.group(1)
     path = match.group(2) or "/"
@@ -74,7 +74,7 @@ def generate_openapi_spec(
         params = func.get("parameters", {})
         
         # Parse the REST path and verb out of the description
-        verb, path = _parse_rest_annotation(description)
+        verb, path = _parse_rest_annotation(name, description)
         
         # Identify path parameters from the `{param}` syntax in the path
         path_param_names = re.findall(r"\{([^}]+)\}", path)
