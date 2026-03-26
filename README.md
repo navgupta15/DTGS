@@ -32,6 +32,11 @@ DTGS calculates a deterministic cryptographic hash for every method it analyzes.
 By default, DTGS ignores common non-source directories as well as `test` and `tests` directories to ensure your agent's tools aren't cluttered with mock functions.
 Additionally, you can supply an `--include-file` to aggressively limit the scan to exact package paths. The text file should simply contain **one package or folder substring per line**.
 
+### 🔎 Rich Trace Logging & LLM Progress Tracking
+DTGS features a centralized, beautiful logging system powered by `rich`.
+When ingesting repositories, it displays exactly which tools the LLM is currently enhancing in real-time (e.g., `[INFO] [1/12] Calling LLM for tool: PetController_findPet`). 
+If you want to observe deeper operations—like exact AST extraction steps, LLM responses, or SQL database upserts—you can simply append the `--verbose` (or `-v`) flag to any CLI command.
+
 ---
 
 ## Installation
