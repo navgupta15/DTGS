@@ -32,6 +32,9 @@ DTGS calculates a deterministic cryptographic hash for every method it analyzes.
 By default, DTGS ignores common non-source directories as well as `test` and `tests` directories to ensure your agent's tools aren't cluttered with mock functions.
 Additionally, you can supply an `--include-file` to aggressively limit the scan to exact package paths. The text file should simply contain **one package or folder substring per line**.
 
+### 🧩 Deep DTO Property Resolution
+When DTGS discovers an object as a request parameter (e.g., `@RequestBody PetDto`), it does **not** stop at simply defining it as an opaque `object`. It maintains a global Class Registry across all analyzed files. When serializing the OpenAPI schema, DTGS recursively unpacks these Java objects (including handling generic type parameters like `List<Pet>`) so that the AI Agent sees every single field property (`name`, `age`, `tags`) directly in the tool schema.
+
 ### 🔎 Rich Trace Logging & LLM Progress Tracking
 DTGS features a centralized, beautiful logging system powered by `rich`.
 When ingesting repositories, it displays exactly which tools the LLM is currently enhancing in real-time (e.g., `[INFO] [1/12] Calling LLM for tool: PetController_findPet`). 
