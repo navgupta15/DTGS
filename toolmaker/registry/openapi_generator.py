@@ -6,7 +6,7 @@ from __future__ import annotations
 import re
 
 
-def _parse_rest_annotation(name: str, annotation_text: str) -> tuple[str, str]:
+def _parse_rest_annotation(name: str, annotation_text: str, class_annotation_text: str = "") -> tuple[str, str]:
     """
     Extract verb and path from a full Spring Boot annotation string.
     Example: @RequestMapping(value="/{id}", method=RequestMethod.GET)
@@ -29,6 +29,20 @@ def _parse_rest_annotation(name: str, annotation_text: str) -> tuple[str, str]:
     path = path_match.group(1) if path_match else "/"
     if not path.startswith("/"):
         path = "/" + path
+        
+    class_path = ""
+    if class_annotation_text:
+        class_path_match = re.search(r'(?:value|path)\s*=\s*["\']([^"\']+)["\']', class_annotation_text)
+        if not class_path_match:
+            class_path_match = re.search(r'\(\s*["\']([^"\']+)["\']', class_annotation_text)
+        class_path = class_path_match.group(1) if class_path_match else ""
+        if class_path and not class_path.startswith("/"):
+            class_path = "/" + class_path
+            
+    if class_path:
+        path = class_path.rstrip("/") + "/" + path.lstrip("/")
+        if not path.startswith("/"):
+            path = "/" + path
         
     # 3. Extract method
     verb_map = {
@@ -89,10 +103,12 @@ def generate_openapi_spec(
         
         # Read the raw REST annotations saved by the AST parser (bypassing the LLM description completely)
         rest_anns = func.get("__rest_annotations", [])
+        class_rest_anns = func.get("__class_rest_annotations", [])
         raw_annotation = rest_anns[0] if rest_anns else ""
+        raw_class_annotation = class_rest_anns[0] if class_rest_anns else ""
         
         # Parse the REST path and verb directly out of the AST annotation string
-        verb, path = _parse_rest_annotation(name, raw_annotation)
+        verb, path = _parse_rest_annotation(name, raw_annotation, raw_class_annotation)
         
         # Identify path parameters from the `{param}` syntax in the path
         path_param_names = re.findall(r"\{([^}]+)\}", path)

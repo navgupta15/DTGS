@@ -111,6 +111,7 @@ def method_to_tool_schema(method: AnalyzedMethod) -> ToolSchema:
         parameters=params,
     )
     schema.function["__rest_annotations"] = method.rest_annotations
+    schema.function["__class_rest_annotations"] = method.class_rest_annotations
     return schema
 
 

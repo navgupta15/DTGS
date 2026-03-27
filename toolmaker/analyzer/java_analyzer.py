@@ -319,9 +319,29 @@ def analyze_file(path: Path) -> list[AnalyzedMethod]:
         if node.type in ("class_declaration", "interface_declaration", "enum_declaration"):
             class_name = _find_class_name(node, source)
             if node.type == "class_declaration":
+                # Find class-level REST annotations
+                class_rest_anns = []
+                for child in node.children:
+                    if child.type == "modifiers":
+                        for mod in child.children:
+                            if mod.type in ("marker_annotation", "annotation"):
+                                ann_text = _node_text(mod, source)
+                                ann_name = ""
+                                for ann_child in mod.children:
+                                    if ann_child.type == "identifier":
+                                        ann_name = _node_text(ann_child, source)
+                                        break
+                                if ann_name in REST_ANNOTATIONS:
+                                    class_rest_anns.append(ann_text)
+                
                 new_methods = _extract_methods_from_class(
                     node, class_name, source, source_file
                 )
+                
+                # Attach class-level annotations to each method
+                for m in new_methods:
+                    m.class_rest_annotations = class_rest_anns
+                    
                 methods.extend(new_methods)
             # Recurse for nested classes
             for child in node.children:

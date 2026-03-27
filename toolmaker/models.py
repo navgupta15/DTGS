@@ -27,6 +27,7 @@ class AnalyzedMethod(BaseModel):
     modifiers: list[str] = Field(default_factory=list)
     javadoc: str | None = None
     rest_annotations: list[str] = Field(default_factory=list)
+    class_rest_annotations: list[str] = Field(default_factory=list)
     line_number: int = 0
 
     @property
