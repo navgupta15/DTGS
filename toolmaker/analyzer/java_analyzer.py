@@ -15,7 +15,7 @@ from pathlib import Path
 import tree_sitter_java as tsjava
 from tree_sitter import Language, Parser, Node
 
-from toolmaker.models import AnalyzedMethod, JavaParameter
+from toolmaker.models import AnalyzedMethod, JavaParameter, AnalyzedClass, ClassField
 
 # ── Language & Parser (module-level singleton) ─────────────────────────────
 JAVA_LANGUAGE = Language(tsjava.language())
@@ -290,6 +290,44 @@ def _extract_methods_from_class(
     return methods
 
 
+def _extract_fields_from_class(
+    class_node: Node,
+    source: bytes,
+) -> list[ClassField]:
+    """Find member variables (field_declaration) in a class body."""
+    fields = []
+    class_body = None
+    for child in class_node.children:
+        if child.type == "class_body":
+            class_body = child
+            break
+
+    if class_body is None:
+        return fields
+
+    for child in class_body.children:
+        if child.type == "field_declaration":
+            field_type = ""
+            for sub in child.children:
+                if sub.type in (
+                    "type_identifier",
+                    "integral_type",
+                    "floating_point_type",
+                    "boolean_type",
+                    "generic_type",
+                    "array_type",
+                ):
+                    field_type = _node_text(sub, source)
+                elif sub.type == "variable_declarator":
+                    for v_child in sub.children:
+                        if v_child.type == "identifier":
+                            field_name = _node_text(v_child, source)
+                            if field_type and field_name:
+                                fields.append(ClassField(name=field_name, java_type=field_type))
+                            break
+    return fields
+
+
 def _find_class_name(node: Node, source: bytes) -> str:
     """Extract the simple class name from a class_declaration node."""
     for child in node.children:
@@ -298,15 +336,15 @@ def _find_class_name(node: Node, source: bytes) -> str:
     return "Unknown"
 
 
-def analyze_file(path: Path) -> list[AnalyzedMethod]:
+def analyze_file(path: Path) -> tuple[list[AnalyzedMethod], list[AnalyzedClass]]:
     """
-    Parse a single .java file and return all extracted methods.
+    Parse a single .java file and return all extracted methods and classes.
 
     Args:
         path: Absolute path to a .java source file.
 
     Returns:
-        List of AnalyzedMethod instances, one per method declaration found.
+        Tuple of (methods, classes) extracted from the file.
     """
     source = path.read_bytes()
     tree = _parser.parse(source)
@@ -314,6 +352,7 @@ def analyze_file(path: Path) -> list[AnalyzedMethod]:
     source_file = str(path)
 
     methods: list[AnalyzedMethod] = []
+    classes: list[AnalyzedClass] = []
 
     def walk(node: Node, enclosing_class: str = "") -> None:
         if node.type in ("class_declaration", "interface_declaration", "enum_declaration"):
@@ -343,6 +382,16 @@ def analyze_file(path: Path) -> list[AnalyzedMethod]:
                     m.class_rest_annotations = class_rest_anns
                     
                 methods.extend(new_methods)
+
+                # Extract DTO fields
+                extracted_fields = _extract_fields_from_class(node, source)
+                classes.append(
+                    AnalyzedClass(
+                        source_file=source_file,
+                        class_name=class_name,
+                        fields=extracted_fields
+                    )
+                )
             # Recurse for nested classes
             for child in node.children:
                 walk(child, class_name)
@@ -351,10 +400,10 @@ def analyze_file(path: Path) -> list[AnalyzedMethod]:
                 walk(child, enclosing_class)
 
     walk(root)
-    return methods
+    return methods, classes
 
 
-def analyze_directory(root: Path, include_patterns: list[str] | None = None) -> list[AnalyzedMethod]:
+def analyze_directory(root: Path, include_patterns: list[str] | None = None) -> tuple[list[AnalyzedMethod], list[AnalyzedClass]]:
     """
     Analyze all .java files under a directory.
 
@@ -363,17 +412,19 @@ def analyze_directory(root: Path, include_patterns: list[str] | None = None) -> 
         include_patterns: Optional list of path substrings to filter files.
 
     Returns:
-        Flat list of all AnalyzedMethod instances across all files.
+        Tuple of (all_methods, all_classes) across the directory.
     """
     from toolmaker.ingestion.github import find_java_files
 
     all_methods: list[AnalyzedMethod] = []
+    all_classes: list[AnalyzedClass] = []
     java_files = find_java_files(root, include_patterns=include_patterns)
 
     for java_file in java_files:
         try:
-            file_methods = analyze_file(java_file)
+            file_methods, file_classes = analyze_file(java_file)
             all_methods.extend(file_methods)
+            all_classes.extend(file_classes)
         except Exception as exc:
             # Log and continue — one bad file shouldn't stop the whole analysis
             import warnings

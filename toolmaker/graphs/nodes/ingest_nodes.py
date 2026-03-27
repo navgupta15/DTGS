@@ -91,11 +91,14 @@ def analyze_file(state: FileAnalysisState) -> dict:
     path = Path(state["file_path"])
     logger.debug(f"Parsing AST for Java file: {path.name}")
     try:
-        methods = _analyze(path)
-        return {"analyzed_methods": [m.model_dump() for m in methods]}
+        methods, classes = _analyze(path)
+        return {
+            "analyzed_methods": [m.model_dump() for m in methods],
+            "analyzed_classes": [c.model_dump() for c in classes]
+        }
     except Exception as exc:
         warnings.warn(f"[DTGS] Failed to analyze {path}: {exc}", stacklevel=2)
-        return {"analyzed_methods": []}
+        return {"analyzed_methods": [], "analyzed_classes": []}
 
 
 # ── Node 5: store_registry ────────────────────────────────────────────────

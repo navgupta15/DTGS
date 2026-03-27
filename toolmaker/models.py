@@ -14,6 +14,19 @@ class JavaParameter(BaseModel):
     annotations: list[str] = Field(default_factory=list)
 
 
+class ClassField(BaseModel):
+    """Represents a declared member variable inside a Java class."""
+    name: str
+    java_type: str
+
+
+class AnalyzedClass(BaseModel):
+    """Represents an extracted Java DTO/Record/POJO class."""
+    source_file: str
+    class_name: str
+    fields: list[ClassField] = Field(default_factory=list)
+
+
 class AnalyzedMethod(BaseModel):
     """
     Represents a single extracted Java method with all metadata

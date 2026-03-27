@@ -18,7 +18,7 @@ def generate_schemas(state: IngestionState) -> dict:
     """
     Convert each AnalyzedMethod dict → OpenAI function-calling ToolSchema.
     """
-    from toolmaker.models import AnalyzedMethod, JavaParameter
+    from toolmaker.models import AnalyzedMethod, JavaParameter, AnalyzedClass, ClassField
     from toolmaker.analyzer.schema_generator import method_to_tool_schema
     from toolmaker.registry.sqlite_registry import ToolRegistry
     import hashlib
@@ -41,12 +41,20 @@ def generate_schemas(state: IngestionState) -> dict:
                 "embedding": emb,
             }
 
+    # Build global Class Registry from this ingestion run
+    raw_classes = state.get("analyzed_classes", [])
+    classes_registry: dict[str, AnalyzedClass] = {}
+    for rc in raw_classes:
+        fields = [ClassField(**f) for f in rc.get("fields", [])]
+        ac = AnalyzedClass(**{**rc, "fields": fields})
+        classes_registry[ac.class_name] = ac
+
     schemas: list[dict] = []
     for raw in state.get("analyzed_methods", []):
         # Reconstruct the Pydantic model from the serialised dict
         params = [JavaParameter(**p) for p in raw.get("parameters", [])]
         method = AnalyzedMethod(**{**raw, "parameters": params})
-        schema = method_to_tool_schema(method)
+        schema = method_to_tool_schema(method, classes_registry)
         schema_dict = schema.model_dump()
         
         # Calculate robust hash of the raw tool JSON before enhancement

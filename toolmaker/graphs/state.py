@@ -36,6 +36,7 @@ class IngestionState(TypedDict):
     # ── Fan-out: analyze_file → accumulated by operator.add ───────────────
     # Each parallel analyze_file node appends its results here.
     analyzed_methods: Annotated[list[dict], operator.add]
+    analyzed_classes: Annotated[list[dict], operator.add]
 
     # ── After generate_schemas ────────────────────────────────────────────
     tool_schemas: list[dict]         # serialised ToolSchema dicts

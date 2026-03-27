@@ -4,7 +4,7 @@ Schema Generator: converts AnalyzedMethod → OpenAI function-calling JSON schem
 from __future__ import annotations
 
 import re
-from toolmaker.models import AnalyzedMethod, ToolSchema, ToolSchemaParameters
+from toolmaker.models import AnalyzedMethod, ToolSchema, ToolSchemaParameters, AnalyzedClass
 
 # Java type → JSON Schema type
 _JAVA_TO_JSON: dict[str, str] = {
@@ -63,7 +63,57 @@ def _sanitize_name(name: str) -> str:
     return safe[:64]
 
 
-def method_to_tool_schema(method: AnalyzedMethod) -> ToolSchema:
+def _build_properties_recursively(
+    java_type: str, 
+    classes_registry: dict[str, AnalyzedClass],
+    visited: set[str]
+) -> dict:
+    """Builds a JSON schema dictionary for a given java type, expanding objects."""
+    # Extract inner type for generics (e.g., List<Pet> -> Pet)
+    match = re.search(r"^[A-Za-z0-9_]+\s*<\s*([^>]+)\s*>", java_type)
+    inner_type = match.group(1).strip() if match else ""
+    
+    base_type = re.sub(r"<[^>]+>", "", java_type).strip().rstrip("[]").rstrip(".").strip()
+    
+    json_type = _JAVA_TO_JSON.get(base_type)
+    is_array = "[]" in java_type or json_type == "array"
+    
+    if is_array:
+        # If it's an array/list, recursively build the schema for its items!
+        item_schema = _build_properties_recursively(inner_type, classes_registry, visited) if inner_type else {"type": "string"}
+        return {"type": "array", "items": item_schema}
+        
+    if json_type and json_type != "object":
+        return {"type": json_type}
+        
+    if base_type in visited:
+        return {"type": "object", "description": "Recursive reference"}
+        
+    if base_type in classes_registry:
+        visited.add(base_type)
+        obj_props = {}
+        required = []
+        for field in classes_registry[base_type].fields:
+            field_schema = _build_properties_recursively(field.java_type, classes_registry, visited)
+            field_schema["description"] = f"{field.name} ({field.java_type})"
+            obj_props[field.name] = field_schema
+            required.append(field.name)
+        visited.remove(base_type)
+        
+        schema: dict = {"type": "object", "properties": obj_props}
+        if required:
+            schema["required"] = required
+            
+        return schema
+        
+    # Unmapped or external class object fallback
+    return {"type": "object"}
+
+
+def method_to_tool_schema(
+    method: AnalyzedMethod,
+    classes_registry: dict[str, AnalyzedClass] | None = None
+) -> ToolSchema:
     """
     Convert an AnalyzedMethod to an OpenAI function-calling ToolSchema.
 
@@ -88,13 +138,11 @@ def method_to_tool_schema(method: AnalyzedMethod) -> ToolSchema:
     properties: dict[str, dict] = {}
     required: list[str] = []
 
-    for param in method.parameters:
-        json_type = _java_type_to_json_schema(param.java_type)
-        prop: dict = {"type": json_type, "description": f"{param.java_type} {param.name}"}
+    classes_registry = classes_registry or {}
 
-        # If array type, add items schema
-        if json_type == "array":
-            prop["items"] = {"type": "string"}  # default, could be refined
+    for param in method.parameters:
+        prop = _build_properties_recursively(param.java_type, classes_registry, set())
+        prop["description"] = f"{param.java_type} {param.name}"
 
         properties[param.name] = prop
         required.append(param.name)
@@ -115,6 +163,9 @@ def method_to_tool_schema(method: AnalyzedMethod) -> ToolSchema:
     return schema
 
 
-def methods_to_tool_schemas(methods: list[AnalyzedMethod]) -> list[ToolSchema]:
+def methods_to_tool_schemas(
+    methods: list[AnalyzedMethod],
+    classes_registry: dict[str, AnalyzedClass] | None = None
+) -> list[ToolSchema]:
     """Convert a list of AnalyzedMethod objects to ToolSchema list."""
-    return [method_to_tool_schema(m) for m in methods]
+    return [method_to_tool_schema(m, classes_registry) for m in methods]
