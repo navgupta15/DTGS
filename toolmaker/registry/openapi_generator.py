@@ -6,33 +6,47 @@ from __future__ import annotations
 import re
 
 
-def _parse_rest_annotation(name: str, description: str) -> tuple[str, str]:
+def _parse_rest_annotation(name: str, annotation_text: str) -> tuple[str, str]:
     """
-    Extract the HTTP method and path from the tool description.
-    Expected format: "REST endpoint (@GetMapping(\"/api/pets\")): ..."
-    Fallback: POST /rpc/{name}
+    Extract verb and path from a full Spring Boot annotation string.
+    Example: @RequestMapping(value="/{id}", method=RequestMethod.GET)
     """
-    match = re.search(r"@([A-Z][a-zA-Z]+Mapping)(?:\(\s*[\"']([^\"']+)[\"']\s*\))?", description)
+    if not annotation_text:
+        return "post", f"/rpc/{name}"
+        
+    # 1. Base annotation name
+    match = re.search(r"@([A-Z][a-zA-Z]+Mapping)", annotation_text)
     if not match:
         return "post", f"/rpc/{name}"
+        
+    ann_name = match.group(1)
     
-    annotation_name = match.group(1)
-    path = match.group(2) or "/"
-    
-    # Map Spring annotations to HTTP verbs
+    # 2. Extract path (from path="..." or value="..." or default single arg)
+    path_match = re.search(r'(?:value|path)\s*=\s*["\']([^"\']+)["\']', annotation_text)
+    if not path_match:
+        path_match = re.search(r'\(\s*["\']([^"\']+)["\']', annotation_text)
+        
+    path = path_match.group(1) if path_match else "/"
+    if not path.startswith("/"):
+        path = "/" + path
+        
+    # 3. Extract method
     verb_map = {
         "GetMapping": "get",
         "PostMapping": "post",
         "PutMapping": "put",
         "DeleteMapping": "delete",
         "PatchMapping": "patch",
-        "RequestMapping": "post",  # fallback if method not specified
     }
-    verb = verb_map.get(annotation_name, "post")
     
-    # Ensure path starts with /
-    if not path.startswith("/"):
-        path = "/" + path
+    verb = verb_map.get(ann_name)
+    if not verb and ann_name == "RequestMapping":
+        # Look for method=RequestMethod.GET
+        method_match = re.search(r'method\s*=\s*(?:RequestMethod\.)?([A-Z]+)', annotation_text)
+        verb = method_match.group(1).lower() if method_match else "post"
+        
+    if not verb:
+        verb = "post"
         
     return verb, path
 
@@ -73,8 +87,12 @@ def generate_openapi_spec(
         description = func.get("description", "")
         params = func.get("parameters", {})
         
-        # Parse the REST path and verb out of the description
-        verb, path = _parse_rest_annotation(name, description)
+        # Read the raw REST annotations saved by the AST parser (bypassing the LLM description completely)
+        rest_anns = func.get("__rest_annotations", [])
+        raw_annotation = rest_anns[0] if rest_anns else ""
+        
+        # Parse the REST path and verb directly out of the AST annotation string
+        verb, path = _parse_rest_annotation(name, raw_annotation)
         
         # Identify path parameters from the `{param}` syntax in the path
         path_param_names = re.findall(r"\{([^}]+)\}", path)

@@ -80,8 +80,7 @@ def method_to_tool_schema(method: AnalyzedMethod) -> ToolSchema:
     if method.javadoc:
         description = method.javadoc
     elif method.rest_annotations:
-        annotations_str = ", ".join(method.rest_annotations)
-        description = f"REST endpoint ({annotations_str}): {method.qualified_name}"
+        description = f"REST endpoint ({method.rest_annotations[0]}): {method.qualified_name}"
     else:
         description = f"Java method: {method.qualified_name}"
 
@@ -106,11 +105,13 @@ def method_to_tool_schema(method: AnalyzedMethod) -> ToolSchema:
         required=required,
     )
 
-    return ToolSchema.from_parts(
+    schema = ToolSchema.from_parts(
         name=func_name,
         description=description,
         parameters=params,
     )
+    schema.function["__rest_annotations"] = method.rest_annotations
+    return schema
 
 
 def methods_to_tool_schemas(methods: list[AnalyzedMethod]) -> list[ToolSchema]:

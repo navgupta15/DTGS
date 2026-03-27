@@ -127,11 +127,9 @@ def _extract_annotations(node: Node, source: bytes) -> list[str]:
         if child.id == node.id:
             break
         if child.type in ("marker_annotation", "annotation"):
-            # annotation name is typically the first named child
-            for subchild in child.children:
-                if subchild.type == "identifier":
-                    annotations.append(_node_text(subchild, source))
-                    break
+            # store the whole annotation text e.g. "@GetMapping(...)"
+            ann_text = _node_text(child, source)
+            annotations.append(ann_text)
 
     return annotations
 
@@ -244,13 +242,14 @@ def _extract_methods_from_class(
                     ):
                         modifiers.append(text)
                     elif mod.type in ("marker_annotation", "annotation"):
+                        ann_text = _node_text(mod, source)
                         ann_name = ""
                         for ann_child in mod.children:
                             if ann_child.type == "identifier":
                                 ann_name = _node_text(ann_child, source)
                                 break
                         if ann_name in REST_ANNOTATIONS:
-                            rest_annotations.append(ann_name)
+                            rest_annotations.append(ann_text)
 
             elif sub.type in (
                 "type_identifier",
