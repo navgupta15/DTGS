@@ -20,7 +20,8 @@ class IngestionState(TypedDict):
     """Shared state for the Java repo ingestion pipeline."""
 
     # ── Input ─────────────────────────────────────────────────────────────
-    github_url: str                  # e.g. "https://github.com/owner/repo"
+    github_url: str | None           # e.g. "https://github.com/owner/repo"
+    local_path: str | None           # local path to directory (for ingest-local)
     registry_path: str               # path to the SQLite DB file
     namespace: str                   # multi-tenant namespace (e.g. "service_a")
     base_url: str                    # target API base URL (e.g. "https://api.myapp.com")

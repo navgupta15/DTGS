@@ -165,6 +165,9 @@ uv run python cli.py serve --port 8000
 # NOTE: Uses the LLM to write fantastic descriptions for the tools by default!
 uv run python cli.py ingest https://github.com/owner/repo --namespace service_a --base-url "https://api.a.com"
 
+# [Local Ingestion] Populate a namespace from a local folder instead of GitHub
+uv run python cli.py ingest-local ./my-local-project --namespace service_local --base-url "https://api.local.com"
+
 # [Targeted Ingestion] Only scan specific packages listed in a file
 echo "com/petclinic/owner" > packages.txt
 uv run python cli.py ingest https://github.com/owner/repo --namespace service_a --include-file packages.txt

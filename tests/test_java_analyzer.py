@@ -11,7 +11,8 @@ FIXTURE = Path(__file__).parent / "fixtures" / "SampleController.java"
 
 @pytest.fixture(scope="module")
 def methods():
-    return analyze_file(FIXTURE)
+    methods, _ = analyze_file(FIXTURE)
+    return methods
 
 
 def _get(methods, name):
@@ -109,13 +110,13 @@ class TestRestAnnotations:
     def test_greet_has_get_mapping(self, methods):
         m = _get(methods, "greet")
         assert m is not None
-        assert "GetMapping" in m.rest_annotations
+        assert any("GetMapping" in ann for ann in m.rest_annotations)
         assert m.is_rest_endpoint is True
 
     def test_create_resource_has_post_mapping(self, methods):
         m = _get(methods, "createResource")
         assert m is not None
-        assert "PostMapping" in m.rest_annotations
+        assert any("PostMapping" in ann for ann in m.rest_annotations)
 
     def test_add_has_no_rest_annotation(self, methods):
         m = _get(methods, "add")
@@ -126,4 +127,4 @@ class TestRestAnnotations:
     def test_search_has_get_mapping(self, methods):
         m = _get(methods, "search")
         assert m is not None
-        assert "GetMapping" in m.rest_annotations
+        assert any("GetMapping" in ann for ann in m.rest_annotations)

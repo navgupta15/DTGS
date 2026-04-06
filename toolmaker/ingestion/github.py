@@ -82,7 +82,8 @@ def find_java_files(root: Path, include_patterns: list[str] | None = None) -> li
     java_files: list[Path] = []
     for path in root.rglob("*.java"):
         # Skip if any parent dir is in excluded set (ignoring case for test/tests if necessary, but exact match is fine usually)
-        if any(part.lower() in excluded_dirs for part in path.parts):
+        rel_parts = path.relative_to(root).parts
+        if any(part.lower() in excluded_dirs for part in rel_parts):
             continue
             
         if include_patterns:

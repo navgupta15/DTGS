@@ -430,4 +430,4 @@ def analyze_directory(root: Path, include_patterns: list[str] | None = None) -> 
             import warnings
             warnings.warn(f"Failed to parse {java_file}: {exc}", stacklevel=2)
 
-    return all_methods
+    return all_methods, all_classes

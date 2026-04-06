@@ -27,7 +27,13 @@ def clone_repo(state: IngestionState) -> dict:
     Returns:
         ``repo_path`` on success, or ``error`` on failure.
     """
-    url: str = state["github_url"]
+    if state.get("local_path"):
+        return {"repo_path": state["local_path"], "error": None}
+
+    url: str | None = state.get("github_url")
+    if not url:
+        return {"error": "Neither github_url nor local_path was provided", "repo_path": ""}
+    
     try:
         repo_path = _clone_repo(url)
         return {"repo_path": str(repo_path), "error": None}
@@ -139,8 +145,8 @@ def store_registry(state: IngestionState) -> dict:
         method_meta=aligned_meta,
     )
 
-    # Clean up the temporary git clone
-    if state.get("repo_path"):
+    # Clean up the temporary git clone if it is not a local ingestion
+    if state.get("repo_path") and not state.get("local_path"):
         cleanup_repo(Path(state["repo_path"]))
 
     summary = (

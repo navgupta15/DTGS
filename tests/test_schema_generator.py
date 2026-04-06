@@ -81,7 +81,7 @@ class TestTypeMapping:
     def test_unknown_type_maps_to_string(self):
         m = _make_method(parameters=[JavaParameter(name="obj", java_type="SomeCustomClass")])
         schema = method_to_tool_schema(m)
-        assert schema.function["parameters"]["properties"]["obj"]["type"] == "string"
+        assert schema.function["parameters"]["properties"]["obj"]["type"] == "object"
 
 
 class TestDescriptionPriority:

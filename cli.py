@@ -224,6 +224,55 @@ def ingest(
     console.print(f"[dim]Stored {len(result.get('registry_ids', []))} tool schemas.[/]")
 
 
+@app.command(name="ingest-local")
+def ingest_local(
+    path: Path = typer.Argument(..., help="Local Java project path to ingest"),
+    registry: Path = typer.Option(Path("dtgs.db"), "--registry", "-r", help="SQLite registry path"),
+    namespace: str = typer.Option("default", "--namespace", help="Multi-tenant namespace for these tools"),
+    base_url: str = typer.Option("", "--base-url", help="Base URL where this API runs (e.g. https://api.myapp.com)"),
+    enhance: bool = typer.Option(True, "--enhance/--no-enhance", help="Use LLM to rewrite and enhance tool descriptions"),
+    include_file: Path | None = typer.Option(None, "--include-file", help="Text file containing list of package paths/patterns to scan"),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose trace logging"),
+) -> None:
+    """
+    Analyze and store tools from a local folder into the SQLite registry (Graph 1).
+    """
+    from toolmaker.logger import setup_logger
+    logger = setup_logger(level="DEBUG" if verbose else "INFO")
+    
+    if not path.exists():
+        console.print(f"[bold red]Error:[/] Path does not exist: {path}")
+        raise typer.Exit(code=1)
+
+    from toolmaker.graphs.ingestion_graph import run_ingestion
+
+    includes = _read_include_file(include_file)
+
+    console.print(f"[bold]Running DTGS Local Ingestion Graph[/] for {path}")
+    console.print(f"[dim]Namespace:[/] {namespace}")
+    console.print(f"[dim]Base URL:[/]  {base_url or '(none)'}")
+    console.print(f"[dim]Enhance:[/]   {'Yes (LLM)' if enhance else 'No'}")
+    console.print(f"[dim]Registry:[/]  {registry}")
+    if includes:
+        console.print(f"[dim]Includes:[/]  Loaded {len(includes)} patterns")
+
+    result = run_ingestion(
+        local_path=str(path),
+        registry_path=str(registry),
+        namespace=namespace,
+        base_url=base_url,
+        enhance_descriptions=enhance,
+        include_patterns=includes,
+    )
+
+    if result.get("error"):
+        console.print(f"[bold red]Ingestion failed:[/] {result['error']}")
+        raise typer.Exit(code=1)
+
+    console.print(f"[bold green]Done![/] {result.get('summary', '')}")
+    console.print(f"[dim]Stored {len(result.get('registry_ids', []))} tool schemas.[/]")
+
+
 @app.command(name="run-agent")
 def run_agent_cmd(
     query: str = typer.Argument(..., help="Natural language query for the agent"),
