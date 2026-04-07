@@ -22,7 +22,8 @@ def test_catalog_server_returns_openapi_spec(tmp_path):
         "function": {
             "name": "Test_endpoint",
             "description": "REST endpoint (@GetMapping(\"/test\"))",
-            "parameters": {"type": "object", "properties": {}}
+            "parameters": {"type": "object", "properties": {}},
+            "__rest_annotations": ["@GetMapping(\"/test\")"]
         }
     }
     registry.upsert_many(

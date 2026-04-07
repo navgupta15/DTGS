@@ -89,16 +89,19 @@ def _build_properties_recursively(
     if base_type in visited:
         return {"type": "object", "description": "Recursive reference"}
         
-    if base_type in classes_registry:
-        visited.add(base_type)
+    # Attempt to find the base type either directly or by its simple name (if fully qualified)
+    registry_key = base_type if base_type in classes_registry else base_type.split('.')[-1]
+        
+    if registry_key in classes_registry:
+        visited.add(registry_key)
         obj_props = {}
         required = []
-        for field in classes_registry[base_type].fields:
+        for field in classes_registry[registry_key].fields:
             field_schema = _build_properties_recursively(field.java_type, classes_registry, visited)
             field_schema["description"] = f"{field.name} ({field.java_type})"
             obj_props[field.name] = field_schema
             required.append(field.name)
-        visited.remove(base_type)
+        visited.remove(registry_key)
         
         schema: dict = {"type": "object", "properties": obj_props}
         if required:

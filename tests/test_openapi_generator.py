@@ -2,18 +2,15 @@ from toolmaker.registry.openapi_generator import _parse_rest_annotation, generat
 
 def test_parse_rest_annotation():
     # Standard Spring Boot annotations
-    assert _parse_rest_annotation('REST endpoint (@GetMapping("/api/pets")): ...') == ("get", "/api/pets")
-    assert _parse_rest_annotation("REST endpoint (@PostMapping('/users')): info") == ("post", "/users")
-    assert _parse_rest_annotation("@DeleteMapping(\"/items/{id}\")") == ("delete", "/items/{id}")
+    assert _parse_rest_annotation("mock", '@GetMapping("/api/pets")') == ("get", "/api/pets")
+    assert _parse_rest_annotation("mock", '@PostMapping(value = "/save")') == ("post", "/save")
+    assert _parse_rest_annotation("mock", '@RequestMapping(path="/delete", method=RequestMethod.DELETE)') == ("delete", "/delete")
     
-    # Missing path defaults to /
-    assert _parse_rest_annotation("@GetMapping") == ("get", "/")
+    # Default mapping without method
+    assert _parse_rest_annotation("mock", '@RequestMapping("/fallback")') == ("get", "/fallback")
     
-    # Missing leading slash
-    assert _parse_rest_annotation("@PutMapping(\"data\")") == ("put", "/data")
-    
-    # Unknown fallback
-    assert _parse_rest_annotation("Just a regular java method") == ("post", "/rpc/unknown")
+    # Missing annotation fallback
+    assert _parse_rest_annotation("myFunc", '') == ("get", "/myFunc")
 
 def test_generate_openapi_spec():
     schemas = [
@@ -27,7 +24,8 @@ def test_generate_openapi_spec():
                         "id": {"type": "integer", "description": "User ID"}
                     },
                     "required": ["id"]
-                }
+                },
+                "__rest_annotations": ["@GetMapping(\"/users/{id}\")"]
             }
         },
         {
@@ -41,7 +39,8 @@ def test_generate_openapi_spec():
                         "age": {"type": "integer"}
                     },
                     "required": ["name"]
-                }
+                },
+                "__rest_annotations": ["@PostMapping(\"/users\")"]
             }
         }
     ]

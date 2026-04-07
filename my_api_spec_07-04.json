@@ -1,0 +1,229 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "DTGS Generated API: localtest",
+    "version": "1.0.0",
+    "description": "Auto-generated OpenAPI specification from DTGS AST Analysis."
+  },
+  "servers": [],
+  "paths": {
+    "/api/greet": {
+      "get": {
+        "operationId": "SampleController_greet",
+        "summary": "SampleController_greet",
+        "description": "Returns a greeting message for the given user name. @param name The name of the user to greet. @return A greeting string.",
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "String name"
+            },
+            "description": "String name"
+          }
+        ]
+      }
+    },
+    "/rpc/SampleController_add": {
+      "post": {
+        "operationId": "SampleController_add",
+        "summary": "SampleController_add",
+        "description": "Adds two integers and returns their sum. @param a First integer operand. @param b Second integer operand. @return The sum of a and b.",
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "a": {
+                    "type": "integer",
+                    "description": "int a"
+                  },
+                  "b": {
+                    "type": "integer",
+                    "description": "int b"
+                  }
+                },
+                "required": [
+                  "a",
+                  "b"
+                ]
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/rpc/SampleController_isPositive": {
+      "post": {
+        "operationId": "SampleController_isPositive",
+        "summary": "SampleController_isPositive",
+        "description": "Checks whether a value is positive.",
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "number",
+                    "description": "double value"
+                  }
+                },
+                "required": [
+                  "value"
+                ]
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/api/search": {
+      "get": {
+        "operationId": "SampleController_search",
+        "summary": "SampleController_search",
+        "description": "Returns a list of items matching the query.",
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          }
+        },
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "String query"
+            },
+            "description": "String query"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "description": "int limit"
+            },
+            "description": "int limit"
+          }
+        ]
+      }
+    },
+    "/api/resource": {
+      "post": {
+        "operationId": "SampleController_createResource",
+        "summary": "SampleController_createResource",
+        "description": "Creates a new resource from JSON payload.",
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "payload": {
+                    "type": "string",
+                    "description": "String payload"
+                  }
+                },
+                "required": [
+                  "payload"
+                ]
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/rpc/SampleController_internalHelper": {
+      "post": {
+        "operationId": "SampleController_internalHelper",
+        "summary": "SampleController_internalHelper",
+        "description": "Java method: SampleController.internalHelper",
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "string",
+                    "description": "String data"
+                  }
+                },
+                "required": [
+                  "data"
+                ]
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/rpc/SampleController_factorial": {
+      "post": {
+        "operationId": "SampleController_factorial",
+        "summary": "SampleController_factorial",
+        "description": "Computes factorial recursively. @param n Non-negative integer. @return n!",
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "n": {
+                    "type": "integer",
+                    "description": "int n"
+                  }
+                },
+                "required": [
+                  "n"
+                ]
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    }
+  }
+}

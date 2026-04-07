@@ -12,12 +12,12 @@ def _parse_rest_annotation(name: str, annotation_text: str, class_annotation_tex
     Example: @RequestMapping(value="/{id}", method=RequestMethod.GET)
     """
     if not annotation_text:
-        return "post", f"/rpc/{name}"
+        return "get", f"/{name}"
         
     # 1. Base annotation name
     match = re.search(r"@([A-Z][a-zA-Z]+Mapping)", annotation_text)
     if not match:
-        return "post", f"/rpc/{name}"
+        return "get", f"/{name}"
         
     ann_name = match.group(1)
     
@@ -40,9 +40,12 @@ def _parse_rest_annotation(name: str, annotation_text: str, class_annotation_tex
             class_path = "/" + class_path
             
     if class_path:
-        path = class_path.rstrip("/") + "/" + path.lstrip("/")
-        if not path.startswith("/"):
-            path = "/" + path
+        # Avoid a trailing slash if method path is just "/"
+        method_path = path.lstrip("/")
+        if not method_path:
+            path = class_path
+        else:
+            path = class_path.rstrip("/") + "/" + method_path
         
     # 3. Extract method
     verb_map = {
@@ -57,10 +60,10 @@ def _parse_rest_annotation(name: str, annotation_text: str, class_annotation_tex
     if not verb and ann_name == "RequestMapping":
         # Look for method=RequestMethod.GET
         method_match = re.search(r'method\s*=\s*(?:RequestMethod\.)?([A-Z]+)', annotation_text)
-        verb = method_match.group(1).lower() if method_match else "post"
+        verb = method_match.group(1).lower() if method_match else "get"
         
     if not verb:
-        verb = "post"
+        verb = "get"
         
     return verb, path
 
