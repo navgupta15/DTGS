@@ -253,3 +253,12 @@ class ToolRegistry:
             if namespace:
                 return conn.execute("SELECT COUNT(*) FROM tools WHERE namespace = ?", (namespace,)).fetchone()[0]
             return conn.execute("SELECT COUNT(*) FROM tools").fetchone()[0]
+
+    def list_namespaces(self) -> list[dict]:
+        """Return a list of all namespaces with their tool counts and latest creation date."""
+        with self._connect() as conn:
+            rows = conn.execute(
+                "SELECT namespace, COUNT(*) as count, MAX(created_at) as last_updated, MAX(base_url) as base_url "
+                "FROM tools GROUP BY namespace ORDER BY namespace"
+            ).fetchall()
+        return [dict(r) for r in rows]

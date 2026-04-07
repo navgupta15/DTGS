@@ -5,9 +5,12 @@ Exposes the multi-tenant SQLite tool registry as standardized OpenAPI 3.1 specif
 from __future__ import annotations
 
 import logging
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from toolmaker.registry.sqlite_registry import ToolRegistry
@@ -32,6 +35,27 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+os.makedirs("toolmaker/server/static", exist_ok=True)
+app.mount("/static", StaticFiles(directory="toolmaker/server/static"), name="static")
+
+@app.get("/", include_in_schema=False)
+async def dashboard():
+    """Serve the single-page dashboard."""
+    return FileResponse("toolmaker/server/static/index.html")
+
+@app.get("/api/v1/namespaces", tags=["Catalog"])
+async def list_namespaces(request: Request):
+    """List all ingested namespaces and their tool counts."""
+    registry: ToolRegistry = request.app.state.registry
+    return registry.list_namespaces()
+
+@app.delete("/api/v1/{namespace}", tags=["Management"])
+async def delete_namespace(request: Request, namespace: str):
+    """Delete all tools for a given namespace."""
+    registry: ToolRegistry = request.app.state.registry
+    count = registry.count(namespace)
+    registry.delete_namespace(namespace)
+    return {"status": "success", "namespace": namespace, "deleted_count": count}
 
 @app.get("/api/v1/{namespace}/openapi.json", tags=["Catalog"])
 async def get_openapi_spec(request: Request, namespace: str):
@@ -74,9 +98,13 @@ async def get_openapi_spec(request: Request, namespace: str):
 
 
 class IngestRequest(BaseModel):
-    github_url: str
+    source_type: str = "github"
+    github_url: str = ""
+    local_path: str = ""
     namespace: str = "default"
     base_url: str = ""
+    include_packages: list[str] | None = None
+    enhance: bool = True
 
 
 @app.post("/api/v1/ingest", tags=["Management"])
@@ -87,15 +115,18 @@ async def ingest_repo(request: Request, payload: IngestRequest):
     """
     from toolmaker.graphs.ingestion_graph import run_ingestion
     
-    logger.info(f"Dynamic ingestion requested for repo: {payload.github_url} (namespace: {payload.namespace})")
+    logger.info(f"Dynamic ingestion requested for namespace: {payload.namespace} ({payload.source_type})")
     db_path = getattr(request.app.state, "registry_path", "dtgs.db")
     
     # Run the ingestion synchronously (could be punted to background task later)
     result = run_ingestion(
-        github_url=payload.github_url,
+        github_url=payload.github_url if payload.source_type == "github" else None,
+        local_path=payload.local_path if payload.source_type == "local" else None,
         registry_path=db_path,
         namespace=payload.namespace,
-        base_url=payload.base_url
+        base_url=payload.base_url,
+        enhance_descriptions=payload.enhance,
+        include_patterns=payload.include_packages
     )
     
     if result.get("error"):

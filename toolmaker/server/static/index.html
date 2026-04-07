@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DTGS — Tool Catalog</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Swagger UI -->
+    <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css" />
+    
+    <style>
+        :root {
+            /* Color Palette: Navy & Cyan */
+            --bg-color: hsl(222, 47%, 9%);
+            --panel-bg: hsla(222, 47%, 14%, 0.7);
+            --panel-border: hsla(222, 47%, 25%, 0.5);
+            --text-main: hsl(210, 40%, 98%);
+            --text-dim: hsl(215, 20%, 65%);
+            
+            --accent-cyan: hsl(199, 89%, 48%);
+            --accent-cyan-hover: hsl(199, 89%, 40%);
+            --accent-red: hsl(0, 84%, 60%);
+            
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            --glass-blur: blur(12px);
+            
+            --radius-md: 12px;
+            --radius-sm: 8px;
+            
+            --font-body: 'Inter', sans-serif;
+            --font-code: 'JetBrains Mono', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at 15% 50%, hsla(199, 89%, 48%, 0.05), transparent 25%),
+                              radial-gradient(circle at 85% 30%, hsla(222, 50%, 50%, 0.05), transparent 25%);
+            color: var(--text-main);
+            font-family: var(--font-body);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+            line-height: 1.5;
+        }
+
+        /* Glassmorphism panel base */
+        .glass-panel {
+            background: var(--panel-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--panel-border);
+            border-radius: var(--radius-md);
+            box-shadow: var(--glass-shadow);
+        }
+
+        /* Layout */
+        #sidebar {
+            width: 300px;
+            min-width: 300px;
+            margin: 16px 8px 16px 16px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            margin: 16px 16px 16px 8px;
+            gap: 16px;
+            overflow: hidden;
+        }
+
+        /* Header / Layout elements */
+        .section-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--panel-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-header h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        /* Sidebar items */
+        .nav-list {
+            list-style: none;
+            overflow-y: auto;
+            flex-grow: 1;
+            padding: 12px;
+        }
+
+        .nav-item {
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: hsla(199, 89%, 48%, 0.1);
+            border-color: hsla(199, 89%, 48%, 0.2);
+        }
+
+        .nav-item.active {
+            background: hsla(199, 89%, 48%, 0.2);
+            border-color: var(--accent-cyan);
+        }
+
+        .nav-item-title {
+            font-weight: 500;
+        }
+
+        .nav-item-meta {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .badge {
+            background: var(--panel-border);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+        }
+
+        .btn-icon {
+            background: none;
+            border: none;
+            color: var(--text-dim);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-icon:hover {
+            color: var(--text-main);
+            background: hsla(222, 47%, 35%, 0.5);
+        }
+
+        .btn-delete:hover {
+            color: var(--accent-red);
+            background: hsla(0, 84%, 60%, 0.1);
+        }
+
+        /* Forms */
+        .ingest-form-container {
+            padding: 20px;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input[type="text"], textarea {
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--panel-border);
+            border-radius: var(--radius-sm);
+            padding: 10px 12px;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            outline: none;
+        }
+
+        input[type="text"]:focus, textarea:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 2px hsla(199, 89%, 48%, 0.2);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+            font-family: var(--font-code);
+            font-size: 0.85rem;
+        }
+
+        .toggle-group {
+            display: flex;
+            background: rgba(0,0,0,0.2);
+            border-radius: var(--radius-sm);
+            padding: 4px;
+            border: 1px solid var(--panel-border);
+        }
+
+        .toggle-btn {
+            flex: 1;
+            padding: 6px;
+            text-align: center;
+            border: none;
+            background: none;
+            color: var(--text-dim);
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .toggle-btn.active {
+            background: var(--panel-border);
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        input[type="checkbox"] {
+            accent-color: var(--accent-cyan);
+            width: 16px;
+            height: 16px;
+        }
+
+        .btn-primary {
+            background: var(--accent-cyan);
+            color: #000;
+            border: none;
+            padding: 10px 24px;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-cyan-hover);
+            transform: translateY(-1px);
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Main Content View */
+        .viewer-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .viewer-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--panel-border);
+        }
+        
+        .viewer-tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            color: var(--text-dim);
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        
+        .viewer-tab.active {
+            color: var(--accent-cyan);
+            border-bottom-color: var(--accent-cyan);
+        }
+        
+        .viewer-body {
+            flex-grow: 1;
+            overflow: auto;
+            position: relative;
+        }
+        
+        .viewer-pane {
+            display: none;
+            position: absolute;
+            inset: 0;
+            overflow: auto;
+        }
+        
+        .viewer-pane.active {
+            display: block;
+        }
+
+        pre.raw-json {
+            padding: 20px;
+            margin: 0;
+            font-family: var(--font-code);
+            font-size: 0.85rem;
+            color: #a6accd;
+        }
+        
+        /* Swagger UI Overrides for Dark Theme */
+        .swagger-ui {
+            color: var(--text-main) !important;
+            filter: invert(88%) hue-rotate(180deg);
+        }
+        .swagger-ui .info .title { color: #000 !important; }
+        .swagger-ui .opblock .opblock-summary-method { background: #000 !important; color: #fff !important; }
+
+        /* Utilities */
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(0,0,0,0.3);
+            border-radius: 50%;
+            border-top-color: #000;
+            animation: spin 1s ease-in-out infinite;
+            display: none;
+        }
+        
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .hidden { display: none !important; }
+        
+        .viewer-container.fullscreen {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            margin: 0;
+            border-radius: 0;
+            z-index: 5000;
+        }
+        
+        /* Modals/Toasts */
+        #toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            padding: 16px 24px;
+            border-radius: var(--radius-sm);
+            backdrop-filter: var(--glass-blur);
+            box-shadow: var(--glass-shadow);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+        }
+        
+        #toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        #toast.error { border-left: 4px solid var(--accent-red); }
+        #toast.success { border-left: 4px solid var(--accent-cyan); }
+        
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--text-dim);
+            text-align: center;
+            padding: 40px;
+        }
+        .empty-state:not(.active) { display: none !important; }
+        .empty-state svg { width: 64px; height: 64px; opacity: 0.3; margin-bottom: 16px; }
+
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar: Namespace List -->
+    <div id="sidebar" class="glass-panel">
+        <div class="section-header">
+            <h2>Catalog</h2>
+            <button class="btn-icon" onclick="loadNamespaces()" title="Refresh List">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.59-10.02l5.04 2.45"/></svg>
+            </button>
+        </div>
+        <ul class="nav-list" id="namespace-list">
+            <!-- Populated via JS -->
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div id="main-content">
+        
+        <!-- Top Panel: Ingestion Form -->
+        <div class="glass-panel">
+            <div class="section-header" style="cursor: pointer;" onclick="toggleIngestForm()">
+                <h2>➕ Ingest New Service</h2>
+                <svg id="ingest-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s; transform: rotate(-90deg);"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </div>
+            
+            <div id="ingest-form-wrapper" class="ingest-form-container" style="display: none;">
+                <form id="ingest-form" onsubmit="submitIngestion(event)">
+                    <div class="form-grid">
+                        
+                        <div class="form-group">
+                            <label>Source Type</label>
+                            <div class="toggle-group">
+                                <button type="button" class="toggle-btn active" onclick="setSourceType('local')" id="btn-src-local">Local Path</button>
+                                <button type="button" class="toggle-btn" onclick="setSourceType('github')" id="btn-src-github">GitHub</button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label id="lbl-source-input">Local Folder Path</label>
+                            <input type="text" id="source-input" placeholder="e.g. C:\workspace\my-spring-app" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Namespace</label>
+                            <input type="text" id="namespace-input" placeholder="e.g. user-service" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Base URL (Optional)</label>
+                            <input type="text" id="baseurl-input" placeholder="e.g. https://api.example.com">
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label>Include Packages (Optional, one per line)</label>
+                            <textarea id="packages-input" placeholder="com.example.demo.controller&#10;com.example.demo.api"></textarea>
+                        </div>
+
+                        <div class="form-group full-width" style="flex-direction: row; justify-content: space-between; align-items: center; margin-top: 8px;">
+                            <label class="checkbox-group">
+                                <input type="checkbox" id="enhance-checkbox" checked>
+                                Enhance descriptions with LLM
+                            </label>
+                            
+                            <button type="submit" class="btn-primary" id="btn-submit">
+                                <span>Start Ingestion</span>
+                                <div class="spinner" id="submit-spinner"></div>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Bottom Panel: OpenAPI Viewer -->
+        <div class="glass-panel viewer-container" id="viewer-container">
+            <div class="viewer-tabs">
+                <div class="viewer-tab active" onclick="switchTab('swagger')" id="tab-swagger">Swagger UI</div>
+                <div class="viewer-tab" onclick="switchTab('json')" id="tab-json">Raw JSON</div>
+                <div style="flex-grow: 1;"></div>
+                <button class="btn-icon" onclick="toggleFullscreen()" style="margin-right: 12px; align-self: center;" title="Toggle Fullscreen">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+                </button>
+            </div>
+            
+            <div class="viewer-body">
+                <div id="empty-viewer" class="empty-state active">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    <p>Select a namespace from the sidebar to view its OpenAPI specification.</p>
+                </div>
+                
+                <div id="pane-swagger" class="viewer-pane">
+                    <div id="swagger-ui"></div>
+                </div>
+                
+                <div id="pane-json" class="viewer-pane">
+                    <pre class="raw-json" id="json-viewer"></pre>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast"></div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+    <script>
+        let currentSourceType = 'local';
+        let currentNamespace = null;
+        let isIngestFormOpen = false;
+        let isViewerFullscreen = false;
+
+        // Form Logic
+        function toggleFullscreen() {
+            isViewerFullscreen = !isViewerFullscreen;
+            document.getElementById('viewer-container').classList.toggle('fullscreen', isViewerFullscreen);
+            // Optionally adjust layout if Swagger UI needs re-rendering
+        }
+
+        function toggleIngestForm() {
+            const wrapper = document.getElementById('ingest-form-wrapper');
+            const chevron = document.getElementById('ingest-chevron');
+            isIngestFormOpen = !isIngestFormOpen;
+            
+            if (isIngestFormOpen) {
+                wrapper.style.display = 'block';
+                chevron.style.transform = 'rotate(0deg)';
+            } else {
+                wrapper.style.display = 'none';
+                chevron.style.transform = 'rotate(-90deg)';
+            }
+        }
+
+        function setSourceType(type) {
+            currentSourceType = type;
+            document.getElementById('btn-src-local').classList.toggle('active', type === 'local');
+            document.getElementById('btn-src-github').classList.toggle('active', type === 'github');
+            
+            const input = document.getElementById('source-input');
+            const lbl = document.getElementById('lbl-source-input');
+            
+            if (type === 'local') {
+                lbl.textContent = 'Local Folder Path';
+                input.placeholder = 'e.g. C:\\workspace\\my-spring-app';
+            } else {
+                lbl.textContent = 'GitHub URL';
+                input.placeholder = 'e.g. https://github.com/spring-projects/spring-petclinic';
+            }
+        }
+
+        function switchTab(tabId) {
+            document.getElementById('tab-swagger').classList.remove('active');
+            document.getElementById('tab-json').classList.remove('active');
+            document.getElementById('pane-swagger').classList.remove('active');
+            document.getElementById('pane-json').classList.remove('active');
+            
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+            
+            if (currentNamespace) {
+                document.getElementById(`pane-${tabId}`).classList.add('active');
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `show ${type}`;
+            setTimeout(() => { toast.classList.remove('show'); }, 4000);
+        }
+
+        // API Calls
+        async function loadNamespaces() {
+            try {
+                const res = await fetch('/api/v1/namespaces');
+                const data = await res.json();
+                
+                const list = document.getElementById('namespace-list');
+                list.innerHTML = '';
+                
+                data.forEach(ns => {
+                    const li = document.createElement('li');
+                    li.className = `nav-item ${currentNamespace === ns.namespace ? 'active' : ''}`;
+                    li.onclick = () => loadSpec(ns.namespace);
+                    
+                    li.innerHTML = `
+                        <div>
+                            <div class="nav-item-title">${ns.namespace}</div>
+                            <div class="nav-item-meta">
+                                <span class="badge">${ns.count} tools</span>
+                            </div>
+                        </div>
+                        <button class="btn-icon btn-delete" onclick="deleteNamespace(event, '${ns.namespace}')" title="Delete Namespace">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        </button>
+                    `;
+                    list.appendChild(li);
+                });
+            } catch (err) {
+                showToast('Failed to load namespaces', 'error');
+            }
+        }
+
+        async function loadSpec(namespace) {
+            currentNamespace = namespace;
+            
+            // Update active state in sidebar
+            document.querySelectorAll('.nav-item').forEach(el => {
+                if(el.querySelector('.nav-item-title').textContent === namespace) {
+                    el.classList.add('active');
+                } else {
+                    el.classList.remove('active');
+                }
+            });
+            
+            document.getElementById('empty-viewer').classList.remove('active');
+            if(document.getElementById('tab-swagger').classList.contains('active')) {
+                document.getElementById('pane-swagger').classList.add('active');
+            } else {
+                document.getElementById('pane-json').classList.add('active');
+            }
+            
+            const specUrl = `/api/v1/${namespace}/openapi.json`;
+            
+            try {
+                // Load JSON viewer
+                const res = await fetch(specUrl);
+                const specData = await res.json();
+                document.getElementById('json-viewer').textContent = JSON.stringify(specData, null, 2);
+                
+                // Initialize Swagger UI
+                SwaggerUIBundle({
+                    url: specUrl,
+                    dom_id: '#swagger-ui',
+                    deepLinking: true,
+                    presets: [SwaggerUIBundle.presets.apis],
+                    layout: "BaseLayout"
+                });
+            } catch(e) {
+                showToast('Failed to load OpenAPI spec', 'error');
+            }
+        }
+
+        async function deleteNamespace(event, namespace) {
+            event.stopPropagation();
+            if(!confirm(`Are you sure you want to delete all tools for namespace '${namespace}'?`)) return;
+            
+            try {
+                const res = await fetch(`/api/v1/${namespace}`, { method: 'DELETE' });
+                if(res.ok) {
+                    showToast(`Namespace '${namespace}' deleted.`);
+                    if(currentNamespace === namespace) {
+                        currentNamespace = null;
+                        document.getElementById('empty-viewer').classList.add('active');
+                        document.getElementById('pane-swagger').classList.remove('active');
+                        document.getElementById('pane-json').classList.remove('active');
+                    }
+                    loadNamespaces();
+                }
+            } catch(e) {
+                showToast(`Failed to delete '${namespace}'`, 'error');
+            }
+        }
+
+        async function submitIngestion(event) {
+            event.preventDefault();
+            
+            const btn = document.getElementById('btn-submit');
+            const spinner = document.getElementById('submit-spinner');
+            
+            const source = document.getElementById('source-input').value;
+            const namespace = document.getElementById('namespace-input').value;
+            const baseUrl = document.getElementById('baseurl-input').value;
+            const rawPackages = document.getElementById('packages-input').value;
+            const enhance = document.getElementById('enhance-checkbox').checked;
+            
+            const pkgList = rawPackages.split('\n').map(p => p.trim()).filter(p => p.length > 0);
+            
+            const payload = {
+                source_type: currentSourceType,
+                namespace: namespace,
+                base_url: baseUrl,
+                enhance: enhance,
+                include_packages: pkgList.length > 0 ? pkgList : null
+            };
+            
+            if (currentSourceType === 'local') {
+                payload.local_path = source;
+            } else {
+                payload.github_url = source;
+            }
+            
+            btn.disabled = true;
+            spinner.style.display = 'block';
+            
+            try {
+                const res = await fetch('/api/v1/ingest', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await res.json();
+                if(!res.ok) throw new Error(data.detail || 'Ingestion failed');
+                
+                showToast(`Successfully ingested! Added ${data.tools_added} tools.`);
+                
+                // Close form and select the new namespace
+                if(isIngestFormOpen) toggleIngestForm();
+                
+                await loadNamespaces();
+                loadSpec(namespace);
+                
+            } catch(e) {
+                showToast(e.message, 'error');
+            } finally {
+                btn.disabled = false;
+                spinner.style.display = 'none';
+            }
+        }
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            loadNamespaces();
+            // Start with form open
+        });
+    </script>
+</body>
+</html>

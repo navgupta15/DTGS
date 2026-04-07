@@ -1,0 +1,140 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "DTGS Generated API: service_local",
+    "version": "1.0.0",
+    "description": "Auto-generated OpenAPI specification from DTGS AST Analysis."
+  },
+  "servers": [
+    {
+      "url": "https://api.local.com"
+    }
+  ],
+  "paths": {
+    "/api/pets/{id}": {
+      "get": {
+        "operationId": "MyCtrl_getPet",
+        "summary": "MyCtrl_getPet",
+        "description": "REST endpoint (@RequestMapping(value = \"/{id}\", method = RequestMethod.GET)): MyCtrl.getPet",
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "String id"
+            },
+            "description": "String id"
+          },
+          {
+            "name": "vo",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "description": "MyTestVo vo"
+            },
+            "description": "MyTestVo vo"
+          }
+        ]
+      }
+    },
+    "/api/pets/add": {
+      "post": {
+        "operationId": "MyCtrl_addPet",
+        "summary": "MyCtrl_addPet",
+        "description": "REST endpoint (@RequestMapping(value = \"/add\", method = RequestMethod.POST)): MyCtrl.addPet",
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "vo": {
+                    "type": "object",
+                    "description": "MyTestVo vo"
+                  }
+                },
+                "required": [
+                  "vo"
+                ]
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/api/pets/del": {
+      "delete": {
+        "operationId": "MyCtrl_delPet",
+        "summary": "MyCtrl_delPet",
+        "description": "REST endpoint (@RequestMapping(value = \"/del\", method = RequestMethod.DELETE)): MyCtrl.delPet",
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "String id"
+            },
+            "description": "String id"
+          }
+        ]
+      }
+    },
+    "/api/pets/update": {
+      "put": {
+        "operationId": "MyCtrl_updatePet",
+        "summary": "MyCtrl_updatePet",
+        "description": "REST endpoint (@RequestMapping(value = \"/update\", method = RequestMethod.PUT)): MyCtrl.updatePet",
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "String id"
+                  },
+                  "vo": {
+                    "type": "object",
+                    "description": "MyTestVo vo"
+                  }
+                },
+                "required": [
+                  "id",
+                  "vo"
+                ]
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    }
+  }
+}
