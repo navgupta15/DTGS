@@ -63,16 +63,14 @@ def clone_repo(url: str, dest: Path | None = None) -> Path:
     return dest
 
 
-def find_java_files(root: Path, include_patterns: list[str] | None = None) -> list[Path]:
+def find_java_files(root: Path) -> list[Path]:
     """
     Recursively find all .java source files under a directory.
 
     Excludes common non-source paths: .git, target, build, .gradle, out, test, tests.
-    Optionally filters files using include_patterns.
 
     Args:
         root: Repository root directory.
-        include_patterns: Optional list of path substrings to filter packages.
 
     Returns:
         Sorted list of absolute paths to .java files.
@@ -85,11 +83,6 @@ def find_java_files(root: Path, include_patterns: list[str] | None = None) -> li
         rel_parts = path.relative_to(root).parts
         if any(part.lower() in excluded_dirs for part in rel_parts):
             continue
-            
-        if include_patterns:
-            path_str = str(path).replace('\\', '/')
-            if not any(pattern in path_str for pattern in include_patterns):
-                continue
 
         java_files.append(path)
 

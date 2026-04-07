@@ -418,11 +418,17 @@ def analyze_directory(root: Path, include_patterns: list[str] | None = None) -> 
 
     all_methods: list[AnalyzedMethod] = []
     all_classes: list[AnalyzedClass] = []
-    java_files = find_java_files(root, include_patterns=include_patterns)
+    java_files = find_java_files(root)
 
     for java_file in java_files:
         try:
             file_methods, file_classes = analyze_file(java_file)
+            
+            if include_patterns:
+                path_str = str(java_file).replace('\\', '/')
+                if not any(pat in path_str or pat.replace('.', '/') in path_str for pat in include_patterns):
+                    file_methods = []
+                    
             all_methods.extend(file_methods)
             all_classes.extend(file_classes)
         except Exception as exc:

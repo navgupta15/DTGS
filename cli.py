@@ -55,7 +55,7 @@ def _run_analysis(root: Path, public_only: bool, output: Path | None, include_pa
     if include_patterns:
         console.print(f"[dim]Filtering using {len(include_patterns)} patterns.[/]")
         
-    methods = analyze_directory(root, include_patterns=include_patterns)
+    methods, classes = analyze_directory(root, include_patterns=include_patterns)
 
     if not methods:
         console.print("[yellow]No Java methods found.[/]")
@@ -90,7 +90,8 @@ def _run_analysis(root: Path, public_only: bool, output: Path | None, include_pa
         table.caption = f"...and {len(methods) - 50} more"
     console.print(table)
 
-    schemas = methods_to_tool_schemas(methods)
+    classes_registry = {c.class_name: c for c in classes}
+    schemas = methods_to_tool_schemas(methods, classes_registry=classes_registry)
     schemas_json = [s.model_dump() for s in schemas]
 
     if output:

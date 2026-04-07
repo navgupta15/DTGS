@@ -58,6 +58,7 @@ class FileAnalysisState(TypedDict):
     registry_path: str               # forwarded through so store_registry can use it
     namespace: str                   # forwarded to store_registry
     base_url: str                    # forwarded to store_registry
+    include_patterns: list[str] | None
 
 
 # ── Agent Query Pipeline State ────────────────────────────────────────────

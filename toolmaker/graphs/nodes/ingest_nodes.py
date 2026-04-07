@@ -48,8 +48,7 @@ def discover_files(state: IngestionState) -> dict:
     Walk the cloned repo and collect all .java file paths.
     """
     root = Path(state["repo_path"])
-    patterns = state.get("include_patterns")
-    java_files = [str(p) for p in find_java_files(root, include_patterns=patterns)]
+    java_files = [str(p) for p in find_java_files(root)]
     logger.info(f"Discovered {len(java_files)} Java files to analyze.")
     return {"java_files": java_files}
 
@@ -77,6 +76,7 @@ def fan_out_analysis(state: IngestionState) -> list[Send] | str:
                 registry_path=state.get("registry_path", "dtgs.db"),
                 namespace=state.get("namespace", "default"),
                 base_url=state.get("base_url", ""),
+                include_patterns=state.get("include_patterns"),
             ),
         )
         for f in files
@@ -98,6 +98,14 @@ def analyze_file(state: FileAnalysisState) -> dict:
     logger.debug(f"Parsing AST for Java file: {path.name}")
     try:
         methods, classes = _analyze(path)
+        
+        # Filter methods (so we only generate endpoints for target packages)
+        patterns = state.get("include_patterns")
+        if patterns:
+            path_str = str(path).replace('\\', '/')
+            if not any(pat in path_str or pat.replace('.', '/') in path_str for pat in patterns):
+                methods = []
+
         return {
             "analyzed_methods": [m.model_dump() for m in methods],
             "analyzed_classes": [c.model_dump() for c in classes]
