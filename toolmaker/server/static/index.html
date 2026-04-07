@@ -410,6 +410,153 @@
         .empty-state:not(.active) { display: none !important; }
         .empty-state svg { width: 64px; height: 64px; opacity: 0.3; margin-bottom: 16px; }
 
+        /* ── Chat UI ─────────────────────────────────── */
+        .chat-wrapper {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        .chat-config {
+            display: flex;
+            gap: 12px;
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--panel-border);
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .chat-config select, .chat-config input {
+            background: rgba(0,0,0,0.25);
+            border: 1px solid var(--panel-border);
+            border-radius: 6px;
+            padding: 5px 10px;
+            color: var(--text-main);
+            font-family: var(--font-code);
+            font-size: 0.8rem;
+            outline: none;
+        }
+        .chat-config select:focus, .chat-config input:focus {
+            border-color: var(--accent-cyan);
+        }
+        .chat-config label {
+            text-transform: none;
+            letter-spacing: 0;
+            font-size: 0.8rem;
+        }
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .chat-msg {
+            max-width: 80%;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 0.92rem;
+            line-height: 1.5;
+            animation: msgIn 0.25s ease;
+        }
+        @keyframes msgIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .chat-msg.user {
+            align-self: flex-end;
+            background: var(--accent-cyan);
+            color: #000;
+            border-bottom-right-radius: 4px;
+        }
+        .chat-msg.agent {
+            align-self: flex-start;
+            background: hsla(222, 47%, 20%, 0.8);
+            border: 1px solid var(--panel-border);
+            border-bottom-left-radius: 4px;
+        }
+        .chat-msg.agent pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .tool-card {
+            align-self: flex-start;
+            max-width: 85%;
+            background: hsla(160, 50%, 15%, 0.6);
+            border: 1px solid hsla(160, 60%, 40%, 0.3);
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 0.85rem;
+            animation: msgIn 0.25s ease;
+        }
+        .tool-card-header {
+            display: flex; align-items: center; gap: 6px;
+            font-weight: 600; color: hsl(160, 60%, 55%);
+            margin-bottom: 6px;
+        }
+        .tool-card-detail {
+            font-family: var(--font-code);
+            font-size: 0.78rem;
+            color: var(--text-dim);
+            margin: 2px 0;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .tool-card-badge {
+            display: inline-block;
+            padding: 1px 7px;
+            border-radius: 4px;
+            font-size: 0.72rem;
+            font-weight: 600;
+        }
+        .tool-card-badge.dry   { background: hsla(45, 90%, 50%, 0.2); color: hsl(45, 90%, 60%); }
+        .tool-card-badge.ok    { background: hsla(120, 60%, 40%, 0.2); color: hsl(120, 60%, 55%); }
+        .tool-card-badge.err   { background: hsla(0, 80%, 50%, 0.2); color: hsl(0, 80%, 60%); }
+        .thinking-indicator {
+            align-self: flex-start;
+            display: flex; gap: 4px; padding: 12px 16px;
+        }
+        .thinking-indicator span {
+            width: 8px; height: 8px;
+            background: var(--accent-cyan);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+        .thinking-indicator span:nth-child(1) { animation-delay: -0.32s; }
+        .thinking-indicator span:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes bounce { 0%,80%,100% { transform: scale(0); } 40% { transform: scale(1); } }
+        .chat-input-bar {
+            display: flex;
+            gap: 8px;
+            padding: 12px 16px;
+            border-top: 1px solid var(--panel-border);
+        }
+        .chat-input-bar input {
+            flex: 1;
+            background: rgba(0,0,0,0.25);
+            border: 1px solid var(--panel-border);
+            border-radius: var(--radius-sm);
+            padding: 10px 14px;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 0.95rem;
+            outline: none;
+        }
+        .chat-input-bar input:focus {
+            border-color: var(--accent-cyan);
+        }
+        .chat-send-btn {
+            background: var(--accent-cyan);
+            color: #000;
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 10px 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .chat-send-btn:hover { background: var(--accent-cyan-hover); }
+        .chat-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
     </style>
 </head>
 <body>
@@ -490,6 +637,7 @@
             <div class="viewer-tabs">
                 <div class="viewer-tab active" onclick="switchTab('swagger')" id="tab-swagger">Swagger UI</div>
                 <div class="viewer-tab" onclick="switchTab('json')" id="tab-json">Raw JSON</div>
+                <div class="viewer-tab" onclick="switchTab('chat')" id="tab-chat">💬 Chat</div>
                 <div style="flex-grow: 1;"></div>
                 <button class="btn-icon" onclick="toggleFullscreen()" style="margin-right: 12px; align-self: center;" title="Toggle Fullscreen">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
@@ -508,6 +656,30 @@
                 
                 <div id="pane-json" class="viewer-pane">
                     <pre class="raw-json" id="json-viewer"></pre>
+                </div>
+
+                <div id="pane-chat" class="viewer-pane">
+                    <div class="chat-wrapper">
+                        <div class="chat-config">
+                            <label>Provider</label>
+                            <select id="chat-provider">
+                                <option value="ollama" selected>Ollama (local)</option>
+                                <option value="openai">OpenAI</option>
+                                <option value="gemini">Gemini</option>
+                            </select>
+                            <label>Model</label>
+                            <input type="text" id="chat-model" value="qwen3:8b" style="width:140px;" />
+                            <label class="checkbox-group" style="margin-left:auto;">
+                                <input type="checkbox" id="chat-dryrun" checked />
+                                Dry-run
+                            </label>
+                        </div>
+                        <div class="chat-messages" id="chat-messages"></div>
+                        <div class="chat-input-bar">
+                            <input type="text" id="chat-input" placeholder="Ask something about your APIs..." />
+                            <button class="chat-send-btn" id="chat-send-btn" onclick="sendChatMessage()">Send</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -564,14 +736,15 @@
         }
 
         function switchTab(tabId) {
-            document.getElementById('tab-swagger').classList.remove('active');
-            document.getElementById('tab-json').classList.remove('active');
-            document.getElementById('pane-swagger').classList.remove('active');
-            document.getElementById('pane-json').classList.remove('active');
+            ['swagger','json','chat'].forEach(t => {
+                document.getElementById(`tab-${t}`).classList.remove('active');
+                document.getElementById(`pane-${t}`).classList.remove('active');
+            });
             
             document.getElementById(`tab-${tabId}`).classList.add('active');
             
             if (currentNamespace) {
+                document.getElementById('empty-viewer').classList.remove('active');
                 document.getElementById(`pane-${tabId}`).classList.add('active');
             }
         }
@@ -628,11 +801,9 @@
             });
             
             document.getElementById('empty-viewer').classList.remove('active');
-            if(document.getElementById('tab-swagger').classList.contains('active')) {
-                document.getElementById('pane-swagger').classList.add('active');
-            } else {
-                document.getElementById('pane-json').classList.add('active');
-            }
+            // Determine which tab is currently active and show its pane
+            const activeTab = ['swagger','json','chat'].find(t => document.getElementById(`tab-${t}`).classList.contains('active')) || 'swagger';
+            document.getElementById(`pane-${activeTab}`).classList.add('active');
             
             const specUrl = `/api/v1/${namespace}/openapi.json`;
             
@@ -650,6 +821,10 @@
                     presets: [SwaggerUIBundle.presets.apis],
                     layout: "BaseLayout"
                 });
+
+                // Reset chat for new namespace
+                chatHistory = [];
+                document.getElementById('chat-messages').innerHTML = '';
             } catch(e) {
                 showToast('Failed to load OpenAPI spec', 'error');
             }
@@ -666,8 +841,7 @@
                     if(currentNamespace === namespace) {
                         currentNamespace = null;
                         document.getElementById('empty-viewer').classList.add('active');
-                        document.getElementById('pane-swagger').classList.remove('active');
-                        document.getElementById('pane-json').classList.remove('active');
+                        ['swagger','json','chat'].forEach(t => document.getElementById(`pane-${t}`).classList.remove('active'));
                     }
                     loadNamespaces();
                 }
@@ -733,10 +907,133 @@
             }
         }
 
+        // ── Chat Logic ────────────────────────────────
+        let chatHistory = [];
+        let isChatBusy = false;
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Enter' && document.activeElement === document.getElementById('chat-input')) {
+                sendChatMessage();
+            }
+        });
+
+        function appendChatBubble(type, html) {
+            const box = document.getElementById('chat-messages');
+            const div = document.createElement('div');
+            div.className = `chat-msg ${type}`;
+            div.innerHTML = html;
+            box.appendChild(div);
+            box.scrollTop = box.scrollHeight;
+            return div;
+        }
+
+        function appendToolCard(tc) {
+            const box = document.getElementById('chat-messages');
+            const card = document.createElement('div');
+            card.className = 'tool-card';
+
+            let badgeClass = tc.dry_run ? 'dry' : (tc.status_code >= 200 && tc.status_code < 300 ? 'ok' : 'err');
+            let badgeText = tc.dry_run ? 'DRY RUN' : `HTTP ${tc.status_code}`;
+
+            let argsStr = JSON.stringify(tc.args, null, 2);
+            let respStr = typeof tc.response === 'object' ? JSON.stringify(tc.response, null, 2) : String(tc.response || '');
+            if (respStr.length > 400) respStr = respStr.substring(0, 400) + '...';
+
+            card.innerHTML = `
+                <div class="tool-card-header">
+                    🔧 ${tc.name}
+                    <span class="tool-card-badge ${badgeClass}">${badgeText}</span>
+                </div>
+                <div class="tool-card-detail">${tc.method} ${tc.url}</div>
+                <div class="tool-card-detail" style="color:var(--text-main);">Args: ${argsStr}</div>
+                <div class="tool-card-detail">Response: ${respStr}</div>
+            `;
+            box.appendChild(card);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function showThinking(show) {
+            let el = document.getElementById('thinking-dots');
+            if (show && !el) {
+                el = document.createElement('div');
+                el.className = 'thinking-indicator';
+                el.id = 'thinking-dots';
+                el.innerHTML = '<span></span><span></span><span></span>';
+                document.getElementById('chat-messages').appendChild(el);
+                document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
+            } else if (!show && el) {
+                el.remove();
+            }
+        }
+
+        async function sendChatMessage() {
+            if (isChatBusy) return;
+            const input = document.getElementById('chat-input');
+            const msg = input.value.trim();
+            if (!msg || !currentNamespace) {
+                if (!currentNamespace) showToast('Select a namespace first', 'error');
+                return;
+            }
+
+            input.value = '';
+            appendChatBubble('user', msg);
+
+            const provider = document.getElementById('chat-provider').value;
+            const model = document.getElementById('chat-model').value;
+            const dryRun = document.getElementById('chat-dryrun').checked;
+
+            const payload = {
+                namespace: currentNamespace,
+                message: msg,
+                history: chatHistory,
+                provider: provider,
+                model: model,
+                dry_run: dryRun
+            };
+
+            isChatBusy = true;
+            document.getElementById('chat-send-btn').disabled = true;
+            showThinking(true);
+
+            try {
+                const res = await fetch('/api/v1/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                showThinking(false);
+
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || 'Chat request failed');
+
+                // Show tool call cards
+                if (data.tool_calls && data.tool_calls.length > 0) {
+                    data.tool_calls.forEach(tc => appendToolCard(tc));
+                }
+
+                // Show agent response
+                if (data.response) {
+                    appendChatBubble('agent', `<pre>${data.response}</pre>`);
+                }
+
+                // Update history for multi-turn
+                chatHistory.push({ role: 'user', content: msg });
+                if (data.response) chatHistory.push({ role: 'assistant', content: data.response });
+
+            } catch (e) {
+                showThinking(false);
+                appendChatBubble('agent', `<span style="color:var(--accent-red);">Error: ${e.message}</span>`);
+            } finally {
+                isChatBusy = false;
+                document.getElementById('chat-send-btn').disabled = false;
+                input.focus();
+            }
+        }
+
         // Init
         document.addEventListener('DOMContentLoaded', () => {
             loadNamespaces();
-            // Start with form open
         });
     </script>
 </body>

@@ -138,3 +138,136 @@ async def ingest_repo(request: Request, payload: IngestRequest):
         "tools_added": len(result.get("registry_ids", [])),
         "summary": result.get("summary")
     }
+
+
+# ── Chat Endpoint ──────────────────────────────────────────────────────────
+
+class ChatMessage(BaseModel):
+    role: str  # "user", "assistant", "tool"
+    content: str
+    tool_calls: list[dict] | None = None
+    tool_call_id: str | None = None
+
+class ChatRequest(BaseModel):
+    namespace: str
+    message: str
+    history: list[ChatMessage] = []
+    provider: str = "ollama"
+    model: str = "qwen3:8b"
+    dry_run: bool = True
+
+
+@app.post("/api/v1/chat", tags=["Chat"])
+async def chat_with_agent(request: Request, payload: ChatRequest):
+    """
+    Send a message to the DTGS chat agent. The agent uses the OpenAPI spec
+    for the given namespace as LLM tools and returns a response with any
+    tool calls made.
+    """
+    import json
+    import os
+    from toolmaker.agent.openapi_to_tools import openapi_to_tools
+    from toolmaker.agent.http_executor import execute_api_call
+
+    # 1. Get the OpenAPI spec for this namespace
+    registry: ToolRegistry = request.app.state.registry
+    schemas = registry.get_all(namespace=payload.namespace, limit=1000)
+    if not schemas:
+        raise HTTPException(status_code=404, detail=f"No tools for namespace '{payload.namespace}'")
+
+    base_url = ""
+    with registry._connect() as conn:
+        row = conn.execute(
+            "SELECT base_url FROM tools WHERE namespace = ? LIMIT 1",
+            (payload.namespace,)
+        ).fetchone()
+        if row and row["base_url"]:
+            base_url = row["base_url"]
+
+    spec = generate_openapi_spec(payload.namespace, schemas, base_url)
+    tools = openapi_to_tools(spec)
+
+    # 2. Set up the LLM
+    os.environ["DTGS_PROVIDER"] = payload.provider
+    os.environ["DTGS_MODEL"] = payload.model
+
+    try:
+        from toolmaker.graphs.nodes.agent_nodes import _get_chat_model
+        from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
+
+        llm = _get_chat_model()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to load LLM ({payload.provider}/{payload.model}): {e}")
+
+    # 3. Build conversation
+    system_prompt = (
+        f"You are DTGS Agent, an AI assistant that discovers and calls REST APIs.\n"
+        f"You have tools for the '{payload.namespace}' service (backend: {base_url}).\n"
+        f"When the user asks something, identify the right API tool, call it, and interpret the result.\n"
+        f"If no tool matches, say so clearly. Do not invent tool names."
+    )
+
+    messages = [SystemMessage(content=system_prompt)]
+
+    # Rebuild history
+    for msg in payload.history:
+        if msg.role == "user":
+            messages.append(HumanMessage(content=msg.content))
+        elif msg.role == "assistant":
+            messages.append(AIMessage(content=msg.content))
+        elif msg.role == "tool":
+            messages.append(ToolMessage(content=msg.content, tool_call_id=msg.tool_call_id or ""))
+
+    messages.append(HumanMessage(content=payload.message))
+
+    # 4. Call LLM with tools
+    llm_with_tools = llm.bind_tools(tools) if tools else llm
+
+    try:
+        response: AIMessage = llm_with_tools.invoke(messages)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"LLM error: {e}")
+
+    # 5. Process tool calls
+    tool_calls_output = []
+    final_text = response.content or ""
+
+    if response.tool_calls:
+        for tc in response.tool_calls:
+            tool_name = tc["name"]
+            tool_args = tc["args"]
+            tool_id = tc["id"]
+
+            result = execute_api_call(
+                spec=spec,
+                operation_id=tool_name,
+                arguments=tool_args,
+                dry_run=payload.dry_run,
+            )
+
+            tool_calls_output.append({
+                "name": tool_name,
+                "args": tool_args,
+                "method": result.get("method", ""),
+                "url": result.get("url", ""),
+                "status_code": result.get("status_code", 0),
+                "response": result.get("body", ""),
+                "dry_run": payload.dry_run,
+            })
+
+            # Feed result back to LLM for synthesis
+            result_str = json.dumps(result.get("body", ""), indent=2) if isinstance(result.get("body"), (dict, list)) else str(result.get("body", ""))
+            messages.append(response)
+            messages.append(ToolMessage(content=result_str, tool_call_id=tool_id))
+
+        # Get final synthesis
+        try:
+            synthesis: AIMessage = llm_with_tools.invoke(messages)
+            final_text = synthesis.content or ""
+        except Exception:
+            final_text = "I called the API but couldn't generate a summary."
+
+    return {
+        "response": final_text,
+        "tool_calls": tool_calls_output,
+    }
