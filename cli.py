@@ -381,6 +381,168 @@ def export(
     console.print(f"[dim]Saved OpenAPI 3.1.0 spec to:[/] {output.absolute()}")
 
 
+@app.command()
+def chat(
+    namespace: str = typer.Option("default", "--namespace", "-n", help="Namespace to load tools from"),
+    dtgs_url: str = typer.Option("http://127.0.0.1:8000", "--dtgs-url", help="DTGS catalog server URL"),
+    dry_run: bool = typer.Option(True, "--dry-run/--live", help="Dry-run mode (no real HTTP calls) or live mode"),
+    provider: str = typer.Option("", "--provider", help="LLM provider: openai, ollama, gemini (overrides DTGS_PROVIDER env)"),
+    model: str = typer.Option("", "--model", help="LLM model name (overrides DTGS_MODEL env)"),
+) -> None:
+    """
+    Interactive chat agent that uses DTGS-discovered APIs as LLM tools.
+
+    Fetches the OpenAPI spec from the running DTGS server, converts operations
+    to LLM tools, and lets you chat naturally. The LLM will call the target
+    backend APIs on your behalf.
+
+    Start the DTGS server first: dtgs serve
+    """
+    import httpx
+    from toolmaker.agent.openapi_to_tools import openapi_to_tools
+    from toolmaker.agent.http_executor import execute_api_call
+
+    # Override env vars if provided
+    if provider:
+        os.environ["DTGS_PROVIDER"] = provider
+    if model:
+        os.environ["DTGS_MODEL"] = model
+
+    # 1. Fetch the OpenAPI spec from the DTGS server
+    spec_url = f"{dtgs_url.rstrip('/')}/api/v1/{namespace}/openapi.json"
+    console.print(f"[bold cyan]Fetching API spec from:[/] {spec_url}")
+
+    try:
+        resp = httpx.get(spec_url, timeout=10)
+        resp.raise_for_status()
+        spec = resp.json()
+    except httpx.ConnectError:
+        console.print(f"[bold red]Error:[/] Could not connect to DTGS server at {dtgs_url}")
+        console.print("[dim]Start the server first with:[/] uv run python cli.py serve")
+        raise typer.Exit(code=1)
+    except httpx.HTTPStatusError as e:
+        console.print(f"[bold red]Error:[/] {e.response.status_code} — {e.response.text}")
+        raise typer.Exit(code=1)
+
+    # 2. Convert OpenAPI spec to LLM tools
+    tools = openapi_to_tools(spec)
+    if not tools:
+        console.print("[yellow]No API operations found in the spec.[/]")
+        raise typer.Exit(code=1)
+
+    console.print(f"[green]Loaded {len(tools)} API tools[/] from namespace [cyan]{namespace}[/]")
+    for t in tools:
+        fn = t["function"]
+        console.print(f"  [dim]•[/] [bold]{fn['name']}[/] — {fn['description'].split(chr(10))[0][:80]}")
+
+    mode_label = "[yellow]DRY-RUN[/]" if dry_run else "[green]LIVE[/]"
+    console.print(f"\n[bold]Mode:[/] {mode_label}")
+    if dry_run:
+        console.print("[dim]Using --dry-run: API calls will be simulated. Use --live to make real HTTP requests.[/]")
+    console.print("[dim]Type 'quit' or 'exit' to end the session.[/]\n")
+
+    # 3. Set up the LLM with tools
+    from toolmaker.graphs.nodes.agent_nodes import _get_chat_model
+    from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
+
+    try:
+        llm = _get_chat_model()
+    except Exception as e:
+        console.print(f"[bold red]Error loading LLM:[/] {e}")
+        console.print("[dim]Set DTGS_PROVIDER and required API keys (OPENAI_API_KEY, GOOGLE_API_KEY, etc.)[/]")
+        raise typer.Exit(code=1)
+
+    base_url = spec.get("servers", [{}])[0].get("url", "")
+    system_prompt = f"""You are DTGS Agent, an AI assistant that discovers and calls REST APIs.
+
+You have access to tools that represent real API endpoints for the service '{namespace}'.
+The target backend is at: {base_url}
+
+When the user asks you to do something:
+1. Identify which API tool to call.
+2. Call it with the correct arguments based on the OpenAPI schema.
+3. Interpret the result and give a clear answer.
+
+If no tool matches, say so clearly. Do not make up tool names or arguments."""
+
+    llm_with_tools = llm.bind_tools(tools)
+    messages = [SystemMessage(content=system_prompt)]
+
+    # 4. Interactive chat loop
+    while True:
+        try:
+            user_input = console.input("[bold cyan]You:[/] ").strip()
+        except (EOFError, KeyboardInterrupt):
+            console.print("\n[dim]Bye![/]")
+            break
+
+        if user_input.lower() in ("quit", "exit", "q"):
+            console.print("[dim]Bye![/]")
+            break
+
+        if not user_input:
+            continue
+
+        messages.append(HumanMessage(content=user_input))
+
+        # LLM response (may include tool calls)
+        try:
+            response: AIMessage = llm_with_tools.invoke(messages)
+        except Exception as e:
+            console.print(f"[bold red]LLM Error:[/] {e}")
+            messages.pop()  # Remove failed user message
+            continue
+
+        messages.append(response)
+
+        # Process tool calls if any
+        if response.tool_calls:
+            for tc in response.tool_calls:
+                tool_name = tc["name"]
+                tool_args = tc["args"]
+                tool_id = tc["id"]
+
+                console.print(f"\n[bold magenta]🔧 Calling:[/] {tool_name}")
+                console.print(f"[dim]   Args: {json.dumps(tool_args, indent=2)}[/]")
+
+                # Execute the API call
+                result = execute_api_call(
+                    spec=spec,
+                    operation_id=tool_name,
+                    arguments=tool_args,
+                    dry_run=dry_run,
+                )
+
+                console.print(f"[dim]   {result['method']} {result['url']}[/]")
+
+                if dry_run:
+                    console.print(f"[yellow]   ↳ DRY RUN result:[/]")
+                else:
+                    status = result.get("status_code", -1)
+                    status_color = "green" if 200 <= status < 300 else "red"
+                    console.print(f"[{status_color}]   ↳ HTTP {status}[/{status_color}]")
+
+                result_str = json.dumps(result.get("body", ""), indent=2) if isinstance(result.get("body"), (dict, list)) else str(result.get("body", ""))
+                console.print(f"[dim]   {result_str[:500]}[/]")
+
+                # Feed the result back to the LLM
+                tool_msg = ToolMessage(content=result_str, tool_call_id=tool_id)
+                messages.append(tool_msg)
+
+            # Get the LLM's final synthesis after tool results
+            try:
+                synthesis: AIMessage = llm_with_tools.invoke(messages)
+                messages.append(synthesis)
+                console.print(f"\n[bold green]Agent:[/] {synthesis.content}")
+            except Exception as e:
+                console.print(f"[bold red]LLM Error during synthesis:[/] {e}")
+        else:
+            # Direct response (no tool call)
+            console.print(f"\n[bold green]Agent:[/] {response.content}")
+
+        console.print()  # Blank line between turns
+
+
 if __name__ == "__main__":
     app()
 

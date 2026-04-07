@@ -261,6 +261,7 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "fastapi" },
+    { name = "httpx" },
     { name = "langchain-core" },
     { name = "langchain-google-genai" },
     { name = "langchain-ollama" },
@@ -283,6 +284,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "fastapi", specifier = ">=0.135.2" },
+    { name = "httpx", specifier = ">=0.28.0" },
     { name = "langchain-core", specifier = ">=1.2.21" },
     { name = "langchain-google-genai", specifier = ">=4.2.1" },
     { name = "langchain-ollama", specifier = ">=1.0.1" },
