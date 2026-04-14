@@ -238,7 +238,7 @@ async def chat_with_agent(request: Request, payload: ChatRequest):
     # 3. Build conversation
     system_prompt = (
         f"You are DTGS Agent, an AI assistant that discovers and calls REST APIs.\n"
-        f"You have tools for the '{payload.namespace}' service (backend: {base_url}).\n"
+        f"You currently have access to {len(tools)} API tools for the '{payload.namespace}' service (backend: {base_url}).\n"
         f"When the user asks something, identify the right API tool, call it, and interpret the result.\n"
         f"If no tool matches, say so clearly. Do not invent tool names."
     )

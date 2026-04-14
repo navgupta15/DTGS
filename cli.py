@@ -455,7 +455,7 @@ def chat(
     base_url = spec.get("servers", [{}])[0].get("url", "")
     system_prompt = f"""You are DTGS Agent, an AI assistant that discovers and calls REST APIs.
 
-You have access to tools that represent real API endpoints for the service '{namespace}'.
+You currently have access to {len(tools)} API tools that represent real API endpoints for the service '{namespace}'.
 The target backend is at: {base_url}
 
 When the user asks you to do something:
