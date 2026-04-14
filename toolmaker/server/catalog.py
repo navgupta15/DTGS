@@ -96,6 +96,42 @@ async def get_openapi_spec(request: Request, namespace: str):
     
     return spec
 
+@app.get("/api/v1/{namespace}/tools", tags=["Catalog"])
+async def get_tools_spec(request: Request, namespace: str):
+    """
+    Returns the LLM-compatible tools format (OpenAI function spec) for the requested namespace.
+    """
+    from toolmaker.agent.openapi_to_tools import openapi_to_tools
+
+    logger.info(f"Serving Tools for namespace: '{namespace}'")
+    registry: ToolRegistry = request.app.state.registry
+    
+    schemas = registry.get_all(namespace=namespace, limit=1000)
+    
+    if not schemas:
+        raise HTTPException(
+            status_code=404, 
+            detail=f"No tools found for namespace '{namespace}'. Has it been ingested?"
+        )
+        
+    base_url = ""
+    with registry._connect() as conn:
+        row = conn.execute(
+            "SELECT base_url FROM tools WHERE namespace = ? LIMIT 1", 
+            (namespace,)
+        ).fetchone()
+        if row and row["base_url"]:
+            base_url = row["base_url"]
+            
+    spec = generate_openapi_spec(
+        namespace=namespace,
+        schemas=schemas,
+        base_url=base_url
+    )
+    
+    return openapi_to_tools(spec)
+
+
 
 class IngestRequest(BaseModel):
     source_type: str = "github"

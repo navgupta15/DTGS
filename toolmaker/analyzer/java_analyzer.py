@@ -270,6 +270,9 @@ def _extract_methods_from_class(
 
         if not method_name:
             continue
+            
+        if "private" in modifiers:
+            continue
 
         javadoc = _extract_javadoc(child, source)
 

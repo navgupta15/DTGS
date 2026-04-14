@@ -162,6 +162,7 @@ The DTGS Web Dashboard is a lightweight single-page app served directly by the F
 | `/` | GET | Serve the dashboard UI |
 | `/api/v1/namespaces` | GET | List all namespaces with counts |
 | `/api/v1/{namespace}/openapi.json` | GET | Get OpenAPI spec for a namespace |
+| `/api/v1/{namespace}/tools` | GET | Get LLM-compatible tools array natively for a namespace |
 | `/api/v1/ingest` | POST | Trigger ingestion (GitHub or local) |
 | `/api/v1/{namespace}` | DELETE | Delete a namespace |
 
@@ -299,7 +300,8 @@ For each Java method the analyzer captures:
 - Class name and method name
 - All parameters with types
 - Return type
-- Access modifiers (`public`, `private`, `static` …)
+- Access modifiers (`public`, `protected`, `static` …) 
+  *(Note: `private` methods are explicitly excluded to prevent exposing internal logic natively to tool generation)*
 - Javadoc description and `@param` / `@return` tags
 - Spring Boot REST annotations (`@GetMapping`, `@PostMapping`, `@PutMapping`, `@DeleteMapping`, `@PatchMapping`, `@RequestMapping`)
 
