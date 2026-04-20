@@ -132,6 +132,121 @@ async def get_tools_spec(request: Request, namespace: str):
     return openapi_to_tools(spec)
 
 
+@app.get("/api/v1/{namespace}/tools/search", tags=["Catalog"])
+async def search_tools(
+    request: Request,
+    namespace: str,
+    q: str = "",
+    top_k: int = 15,
+    rest_only: bool = True,
+):
+    """
+    Search for tools relevant to a natural language query.
+    Returns filtered tools in OpenAI function-calling format.
+
+    Used by dtgs-sdk for per-query tool filtering when namespaces have many tools.
+    """
+    from toolmaker.agent.openapi_to_tools import openapi_to_tools
+
+    logger.info(f"Tool search for namespace '{namespace}': q='{q}', top_k={top_k}")
+    registry: ToolRegistry = request.app.state.registry
+
+    if not q:
+        # No query — return all tools (respecting rest_only)
+        if rest_only:
+            schemas = registry.get_rest_tools(namespace=namespace, limit=top_k)
+        else:
+            schemas = registry.get_all(namespace=namespace, limit=top_k)
+    else:
+        # Try semantic search if embeddings exist
+        import os
+        query_embedding: list[float] | None = None
+        api_key = os.environ.get("OPENAI_API_KEY", "")
+        if api_key:
+            try:
+                from openai import OpenAI
+                client = OpenAI(api_key=api_key)
+                resp = client.embeddings.create(
+                    model="text-embedding-3-small",
+                    input=[q],
+                )
+                query_embedding = resp.data[0].embedding
+            except Exception:
+                pass
+
+        schemas = registry.search(
+            query=q,
+            namespace=namespace,
+            query_embedding=query_embedding,
+            top_k=top_k,
+        )
+
+    if not schemas:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No tools found for namespace '{namespace}' matching query '{q}'."
+        )
+
+    # Convert to OpenAPI spec then to OpenAI tools format
+    base_url = ""
+    with registry._connect() as conn:
+        row = conn.execute(
+            "SELECT base_url FROM tools WHERE namespace = ? LIMIT 1",
+            (namespace,)
+        ).fetchone()
+        if row and row["base_url"]:
+            base_url = row["base_url"]
+
+    spec = generate_openapi_spec(namespace=namespace, schemas=schemas, base_url=base_url)
+    return openapi_to_tools(spec)
+
+
+@app.get("/api/v1/{namespace}/controllers", tags=["Catalog"])
+async def list_controllers(request: Request, namespace: str):
+    """
+    List all controllers (grouped by class_name) for the given namespace.
+    Returns controller-level summaries with API counts.
+    """
+    registry: ToolRegistry = request.app.state.registry
+    controllers = registry.get_controller_groups(namespace)
+
+    if not controllers:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No controllers found for namespace '{namespace}'."
+        )
+
+    return controllers
+
+
+@app.get("/api/v1/{namespace}/controllers/{class_name}/tools", tags=["Catalog"])
+async def get_controller_tools(request: Request, namespace: str, class_name: str):
+    """
+    Returns tools for a specific controller in OpenAI function-calling format.
+    """
+    from toolmaker.agent.openapi_to_tools import openapi_to_tools
+
+    registry: ToolRegistry = request.app.state.registry
+    schemas = registry.get_tools_by_class(namespace, class_name)
+
+    if not schemas:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No tools found for controller '{class_name}' in namespace '{namespace}'."
+        )
+
+    base_url = ""
+    with registry._connect() as conn:
+        row = conn.execute(
+            "SELECT base_url FROM tools WHERE namespace = ? LIMIT 1",
+            (namespace,)
+        ).fetchone()
+        if row and row["base_url"]:
+            base_url = row["base_url"]
+
+    spec = generate_openapi_spec(namespace=namespace, schemas=schemas, base_url=base_url)
+    return openapi_to_tools(spec)
+
 
 class IngestRequest(BaseModel):
     source_type: str = "github"

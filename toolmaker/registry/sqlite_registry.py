@@ -248,6 +248,52 @@ class ToolRegistry:
             ).fetchall()
         return [json.loads(r["schema_json"]) for r in rows]
 
+    def get_rest_tools(self, namespace: str = "default", limit: int = 500) -> list[dict]:
+        """Return only REST-annotated tool schemas (is_rest=1) for a namespace."""
+        with self._connect() as conn:
+            rows = conn.execute(
+                "SELECT schema_json FROM tools WHERE namespace = ? AND is_rest = 1 LIMIT ?",
+                (namespace, limit)
+            ).fetchall()
+        return [json.loads(r["schema_json"]) for r in rows]
+
+    def get_controller_groups(self, namespace: str = "default") -> list[dict]:
+        """
+        Group REST tools by class_name and return controller-level summaries.
+
+        Returns:
+            [
+                {
+                    "class_name": "PaymentController",
+                    "api_count": 18,
+                    "tool_names": "processPayment, refundPayment, ..."
+                },
+                ...
+            ]
+        """
+        with self._connect() as conn:
+            rows = conn.execute(
+                """
+                SELECT class_name, COUNT(*) as api_count,
+                       GROUP_CONCAT(name, ', ') as tool_names
+                FROM tools
+                WHERE namespace = ? AND is_rest = 1 AND class_name != ''
+                GROUP BY class_name
+                ORDER BY class_name
+                """,
+                (namespace,)
+            ).fetchall()
+        return [dict(r) for r in rows]
+
+    def get_tools_by_class(self, namespace: str, class_name: str) -> list[dict]:
+        """Load tool schemas for a single controller class."""
+        with self._connect() as conn:
+            rows = conn.execute(
+                "SELECT schema_json FROM tools WHERE namespace = ? AND class_name = ? AND is_rest = 1",
+                (namespace, class_name)
+            ).fetchall()
+        return [json.loads(r["schema_json"]) for r in rows]
+
     def count(self, namespace: str | None = None) -> int:
         with self._connect() as conn:
             if namespace:
