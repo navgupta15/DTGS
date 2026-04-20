@@ -1,0 +1,28 @@
+[project]
+name = "dtgs-sdk"
+version = "0.1.0"
+description = "Client SDK for the Dynamic Tool Generation System (DTGS) — discover, filter, and execute API tools from any LLM agent."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+dependencies = [
+    "httpx>=0.27.0",
+]
+
+[project.optional-dependencies]
+langchain = ["langchain-core>=0.2.0"]
+search = ["sentence-transformers>=3.0.0"]
+all = ["dtgs-sdk[langchain,search]"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.0",
+    "pytest-httpx>=0.30.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
