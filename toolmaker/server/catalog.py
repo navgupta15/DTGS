@@ -309,34 +309,25 @@ class ChatRequest(BaseModel):
 
 
 @app.post("/api/v1/chat", tags=["Chat"])
-async def chat_with_agent(request: Request, payload: ChatRequest):
+def chat_with_agent(request: Request, payload: ChatRequest):
     """
-    Send a message to the DTGS chat agent. The agent uses the OpenAPI spec
-    for the given namespace as LLM tools and returns a response with any
-    tool calls made.
+    Send a message to the DTGS chat agent. Uses the dtgs_sdk locally
+    to filter tools via query and execute API calls.
     """
     import json
     import os
-    from toolmaker.agent.openapi_to_tools import openapi_to_tools
-    from toolmaker.agent.http_executor import execute_api_call
-
-    # 1. Get the OpenAPI spec for this namespace
-    registry: ToolRegistry = request.app.state.registry
-    schemas = registry.get_all(namespace=payload.namespace, limit=1000)
-    if not schemas:
-        raise HTTPException(status_code=404, detail=f"No tools for namespace '{payload.namespace}'")
-
-    base_url = ""
-    with registry._connect() as conn:
-        row = conn.execute(
-            "SELECT base_url FROM tools WHERE namespace = ? LIMIT 1",
-            (payload.namespace,)
-        ).fetchone()
-        if row and row["base_url"]:
-            base_url = row["base_url"]
-
-    spec = generate_openapi_spec(payload.namespace, schemas, base_url)
-    tools = openapi_to_tools(spec)
+    from dtgs_sdk import DTGSToolkit
+    
+    # 1. Initialize DTGSToolkit using the running server's base URL
+    server_url = str(request.base_url).rstrip("/")
+    toolkit = DTGSToolkit(
+        server_url=server_url,
+        namespace=payload.namespace,
+        dry_run=payload.dry_run
+    )
+    
+    # Get tools dynamically filtered by user query
+    tools = toolkit.get_tools(query=payload.message)
 
     # 2. Set up the LLM
     os.environ["DTGS_PROVIDER"] = payload.provider
@@ -353,7 +344,7 @@ async def chat_with_agent(request: Request, payload: ChatRequest):
     # 3. Build conversation
     system_prompt = (
         f"You are DTGS Agent, an AI assistant that discovers and calls REST APIs.\n"
-        f"You currently have access to {len(tools)} API tools for the '{payload.namespace}' service (backend: {base_url}).\n"
+        f"You currently have access to {len(tools)} API tools for the '{payload.namespace}' service.\n"
         f"When the user asks something, identify the right API tool, call it, and interpret the result.\n"
         f"If no tool matches, say so clearly. Do not invent tool names."
     )
@@ -389,19 +380,23 @@ async def chat_with_agent(request: Request, payload: ChatRequest):
             tool_args = tc["args"]
             tool_id = tc["id"]
 
-            result = execute_api_call(
-                spec=spec,
-                operation_id=tool_name,
-                arguments=tool_args,
-                dry_run=payload.dry_run,
-            )
+            try:
+                result = toolkit.execute(tool_name, tool_args)
+            except Exception as e:
+                result = {
+                    "method": "ERROR",
+                    "url": "ERROR",
+                    "status_code": -1,
+                    "body": f"Failed to execute {tool_name}: {e}",
+                    "dry_run": payload.dry_run
+                }
 
             tool_calls_output.append({
                 "name": tool_name,
                 "args": tool_args,
                 "method": result.get("method", ""),
                 "url": result.get("url", ""),
-                "status_code": result.get("status_code", 0),
+                "status_code": result.get("status_code", -1),
                 "response": result.get("body", ""),
                 "dry_run": payload.dry_run,
             })
@@ -422,3 +417,4 @@ async def chat_with_agent(request: Request, payload: ChatRequest):
         "response": final_text,
         "tool_calls": tool_calls_output,
     }
+

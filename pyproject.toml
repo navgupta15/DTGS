@@ -5,6 +5,7 @@ description = "Dynamic Tool Generation System (DTGS) — auto-discover LLM tools
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "dtgs-sdk[langchain]",
     "fastapi>=0.135.2",
     "httpx>=0.28.0",
     "langchain-core>=1.2.21",
@@ -25,3 +26,11 @@ dependencies = [
 dev = [
     "pytest>=9.0.2",
 ]
+
+[tool.uv.workspace]
+members = [
+    "dtgs_sdk",
+]
+
+[tool.uv.sources]
+dtgs-sdk = { workspace = true }
